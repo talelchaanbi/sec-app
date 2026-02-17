@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rapport TP Client/Serveur Web — Détail & Images</title>
+  <style>
+    :root{--c1:#0b5cab;--c2:#f3f7fc;--txt:#1f2937}
+    *{box-sizing:border-box}
+    body{font-family:Arial,Helvetica,sans-serif;color:var(--txt);margin:0;background:#fff}
+    .page{max-width:900px;margin:0 auto;padding:28px 34px}
+    .cover{background:linear-gradient(135deg,var(--c1),#1f7ad8);color:#fff;padding:48px 34px;border-radius:14px;margin-bottom:26px}
+    h1{margin:0 0 10px;font-size:31px}
+    h2{color:var(--c1);border-left:5px solid var(--c1);padding-left:10px;margin-top:32px}
+    h3{margin-top:20px;color:#0f4b85}
+    p,li{line-height:1.55}
+    .meta{opacity:.95;font-size:14px;margin-top:8px}
+    .box{background:var(--c2);padding:14px 16px;border-radius:10px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+    figure{margin:0 0 18px 0;background:#fff;border:1px solid #d9e2ef;border-radius:10px;padding:10px}
+    figure img{width:100%;height:auto;border-radius:6px;display:block}
+    figcaption{font-size:13px;color:#44556a;margin-top:8px}
+    .small{font-size:13px;color:#4b5563}
+    code{background:#eef5ff;padding:2px 5px;border-radius:5px}
+    pre{background:#f8fbff;border:1px solid #dde8f5;border-radius:10px;padding:12px;overflow:auto}
+    .footer{margin-top:25px;font-size:12px;color:#6b7280;text-align:center}
+    @media print {.cover{page-break-after:always}.section{page-break-inside:avoid}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="cover">
+      <h1>Rapport TP Client / Serveur Web</h1>
+      <p class="meta"><strong>Nom :</strong> Talel Chaanbi &nbsp;|&nbsp; <strong>Classe :</strong> SSII (FAD)</p>
+      <p>Installation Apache2, PHP, MySQL, authentification PHP et analyse Wireshark.</p>
+      <p class="meta"><strong>Date :</strong> 17/02/2026 &nbsp;|&nbsp; <strong>Travail :</strong> Individuel</p>
+      <p class="meta"><strong>Projet :</strong> Application PHP d'authentification simple</p>
+    </section>
+
+    <section class="section">
+      <h2>1) Objectif du TP</h2>
+      <div class="box">
+        <p>Mettre en place une application Web PHP côté serveur avec :</p>
+        <ul>
+          <li>un serveur HTTP Apache2,</li>
+          <li>un moteur PHP,</li>
+          <li>une base de données MySQL,</li>
+          <li>une page d’authentification (login/mot de passe),</li>
+          <li>des tests d’authentification réussie et échouée côté client,</li>
+          <li>une capture réseau avec Wireshark.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>2) Contexte et architecture</h2>
+      <ul>
+        <li><strong>Serveur</strong> : machine hébergeant Apache2, PHP, MySQL et les fichiers PHP.</li>
+        <li><strong>Client</strong> : machine distante qui accède à l’application via navigateur.</li>
+        <li><strong>Communication</strong> : HTTP entre client et serveur (port 80).</li>
+      </ul>
+      <p class="small">Flux logique :</p>
+      <ol>
+        <li>Le client envoie une requête vers la page de connexion.</li>
+        <li>Le serveur renvoie le formulaire d’authentification.</li>
+        <li>Le client soumet <code>login</code> + <code>password</code>.</li>
+        <li>Le serveur vérifie les informations dans MySQL.</li>
+        <li>En cas de succès : création de session PHP puis redirection vers l’espace privé.</li>
+        <li>En cas d’échec : affichage d’un message d’erreur.</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>3) Fichiers du projet analysés</h2>
+      <ul>
+        <li><strong>config.php</strong> : configuration de connexion MySQL (<code>authdb</code>, utilisateur <code>root</code>), initialisation de la connexion et gestion d’erreur.</li>
+        <li><strong>index.php</strong> : page de connexion, traitement du formulaire et vérification SQL avec requête préparée.</li>
+        <li><strong>dashboard.php</strong> : page privée affichée uniquement si la session est active.</li>
+        <li><strong>logout.php</strong> : destruction de session et retour à la page d’authentification.</li>
+      </ul>
+      <div class="grid3">
+        <figure>
+          <img src="assets/login_page_client.jpeg" alt="Page de connexion client" />
+          <figcaption>Page de connexion affichée côté client.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/success_login.jpeg" alt="Connexion réussie" />
+          <figcaption>Connexion réussie (dashboard).</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/failed_login.jpeg" alt="Connexion échouée" />
+          <figcaption>Connexion échouée (message d’erreur).</figcaption>
+        </figure>
+      </div>
+      <div class="grid2">
+        <figure>
+          <img src="assets/annexe-a-connexion.png" alt="Annexe connexion" />
+          <figcaption>Annexe A — Formulaire de connexion (autre vue).</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/annexe-b-dashboard.png" alt="Annexe dashboard" />
+          <figcaption>Annexe B — Dashboard après connexion.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/annexe-c-erreur.png" alt="Annexe erreur" />
+          <figcaption>Annexe C — Message d’erreur lors d’un échec.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>4) Mise en place serveur (Apache2, PHP, MySQL)</h2>
+      <h3>4.1 Installation des composants (référence)</h3>
+      <ul>
+        <li>apache2</li>
+        <li>php</li>
+        <li>libapache2-mod-php</li>
+        <li>mysql-server</li>
+        <li>php-mysql</li>
+      </ul>
+      <p>Après installation :</p>
+      <ul>
+        <li>démarrage/activation d’Apache2 et MySQL,</li>
+        <li>copie des fichiers PHP dans le dossier Web serveur,</li>
+        <li>vérification de l’état du service Apache (voir ci-dessous).</li>
+      </ul>
+      <figure>
+        <img src="assets/annexe-f-apache-status.png" alt="Statut Apache" />
+        <figcaption>État du service Apache2 côté serveur.</figcaption>
+      </figure>
+      <h3>4.2 Déploiement</h3>
+      <p>Les fichiers PHP ont été déployés dans le répertoire Web du serveur.<br>Commande observée dans l’historique terminal : copie des <code>.php</code> vers <code>/var/www/html/</code>.</p>
+    </section>
+
+    <section class="section">
+      <h2>5) Base de données MySQL</h2>
+      <h3>5.1 Schéma minimal demandé</h3>
+      <p>Base : <code>authdb</code><br>Table : <code>users</code> avec deux colonnes : <code>login</code> et <code>pass</code>.</p>
+      <pre>CREATE DATABASE IF NOT EXISTS authdb;
+USE authdb;
+CREATE TABLE IF NOT EXISTS users (
+  login VARCHAR(50) PRIMARY KEY,
+  pass VARCHAR(255) NOT NULL
+);
+INSERT INTO users (login, pass) VALUES ('admin', 'admin123');</pre>
+      <figure>
+        <img src="assets/bd.png" alt="Capture base de données" />
+        <figcaption>Table MySQL contenant les identifiants valides.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section">
+      <h2>6) Fonctionnement de l’authentification</h2>
+      <h3>6.1 Traitement applicatif</h3>
+      <ul>
+        <li>Dans <strong>index.php</strong> : récupération des champs du formulaire, validation des champs non vides, exécution d’une requête préparée <code>SELECT login FROM users WHERE login = ? AND pass = ? LIMIT 1</code>, création de session ou message d’échec.</li>
+        <li>Dans <strong>dashboard.php</strong> : contrôle d’accès via session, affichage “Authentification réussie”.</li>
+        <li>Dans <strong>logout.php</strong> : fermeture de session, redirection vers la page de connexion.</li>
+      </ul>
+      <h3>6.2 Résultats attendus et observés</h3>
+      <ul>
+        <li><strong>Page de connexion affichée</strong> :
+          <figure><img src="assets/login_page_client.jpeg" alt="Page de connexion" /><figcaption>Page de connexion (client)</figcaption></figure>
+          <figure><img src="assets/annexe-a-connexion.png" alt="Annexe connexion" /><figcaption>Annexe A — Formulaire de connexion</figcaption></figure>
+        </li>
+        <li><strong>Connexion réussie (accès dashboard)</strong> :
+          <figure><img src="assets/success_login.jpeg" alt="Connexion réussie" /><figcaption>Connexion réussie (dashboard)</figcaption></figure>
+          <figure><img src="assets/annexe-b-dashboard.png" alt="Annexe dashboard" /><figcaption>Annexe B — Dashboard</figcaption></figure>
+        </li>
+        <li><strong>Connexion échouée (message d’erreur)</strong> :
+          <figure><img src="assets/failed_login.jpeg" alt="Connexion échouée" /><figcaption>Connexion échouée (erreur)</figcaption></figure>
+          <figure><img src="assets/annexe-c-erreur.png" alt="Annexe erreur" /><figcaption>Annexe C — Message d’erreur</figcaption></figure>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>7) Analyse réseau Wireshark</h2>
+      <figure>
+        <img src="assets/annexe-d-wireshark.png" alt="Capture Wireshark" />
+        <figcaption>Capture du trafic HTTP généré pendant les tests d’authentification.</figcaption>
+      </figure>
+      <ul>
+        <li>On observe des échanges HTTP entre client et serveur,</li>
+        <li>La soumission du formulaire se fait en requête <code>POST</code>,</li>
+        <li>Sans HTTPS, les données applicatives peuvent être visibles en clair dans le trafic,</li>
+        <li>Présence de réponses HTTP du serveur (succès/erreur/redirection).</li>
+      </ul>
+      <p>Cela valide la génération effective de trafic Web pendant les tests d’authentification.</p>
+    </section>
+
+    <section class="section">
+      <h2>8) Bilan sécurité</h2>
+      <ul>
+        <li>Usage de requête préparée SQL (réduction du risque d’injection SQL),</li>
+        <li>Protection <code>htmlspecialchars()</code> lors de l’affichage de texte dynamique,</li>
+        <li>Contrôle de session pour l’accès à la page privée.</li>
+      </ul>
+      <p><strong>Limites (dans le cadre pédagogique)</strong> :</p>
+      <ul>
+        <li>Mot de passe stocké en clair dans la base (<code>pass</code>),</li>
+        <li>Identifiants de base en clair dans <strong>config.php</strong>,</li>
+        <li>Trafic HTTP non chiffré (préférer HTTPS).</li>
+      </ul>
+      <p><strong>Améliorations recommandées</strong> :</p>
+      <ul>
+        <li>Hachage des mots de passe (<code>password_hash()</code> / <code>password_verify()</code>),</li>
+        <li>Compte MySQL dédié avec privilèges minimaux,</li>
+        <li>Activation TLS/HTTPS,</li>
+        <li>Ajout de protections anti-bruteforce (temporisation, compteur, journalisation).</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>9) Conclusion</h2>
+      <ul>
+        <li>Environnement serveur Apache2/PHP/MySQL opérationnel,</li>
+        <li>Table MySQL contenant login/mot de passe valides,</li>
+        <li>Authentification réussie puis échouée vérifiée via navigateur client,</li>
+        <li>Capture Wireshark effectuée et exploitée,</li>
+        <li>Preuves jointes via captures d’écran dans <strong>assets</strong>.</li>
+      </ul>
+      <p>L’objectif pédagogique client/serveur Web est atteint.</p>
+    </section>
+
+    <section class="section">
+      <h2>10) Annexes (captures)</h2>
+      <div class="grid2">
+        <figure><img src="assets/annexe-a-connexion.png" alt="Annexe connexion" /><figcaption>A — Connexion</figcaption></figure>
+        <figure><img src="assets/annexe-b-dashboard.png" alt="Annexe dashboard" /><figcaption>B — Dashboard</figcaption></figure>
+        <figure><img src="assets/annexe-c-erreur.png" alt="Annexe erreur" /><figcaption>C — Erreur</figcaption></figure>
+        <figure><img src="assets/annexe-d-wireshark.png" alt="Annexe Wireshark" /><figcaption>D — Wireshark</figcaption></figure>
+        <figure><img src="assets/annexe-f-apache-status.png" alt="Annexe Apache" /><figcaption>F — État Apache</figcaption></figure>
+        <figure><img src="assets/bd.png" alt="Base de données" /><figcaption>Base de données</figcaption></figure>
+        <figure><img src="assets/login_page_client.jpeg" alt="Page de connexion client" /><figcaption>Page de connexion client</figcaption></figure>
+        <figure><img src="assets/success_login.jpeg" alt="Connexion réussie" /><figcaption>Connexion réussie</figcaption></figure>
+        <figure><img src="assets/failed_login.jpeg" alt="Connexion échouée" /><figcaption>Connexion échouée</figcaption></figure>
+      </div>
+    </section>
+
+    <p class="footer">Fin du rapport — TP Client/Serveur Web (PHP, Apache2, MySQL)</p>
+  </div>
+</body>
+</html>
