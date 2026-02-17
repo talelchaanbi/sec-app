@@ -153,6 +153,33 @@ Le serveur renvoie la page index.php avec un message d'erreur :
 
 "Authentification échouée : login ou mot de passe invalide."
 
+### 5.5 Détail des interfaces côté client (par scénario)
+
+Cette section décrit clairement ce que voit l'utilisateur client selon le résultat de l'authentification :
+
+1. **Accès initial à l'interface de login**
+	- URL accédée : `/index.php`
+	- Interface affichée : formulaire avec champs `login` et `mot de passe`
+	- Captures associées : Annexe A et Annexe G
+
+2. **Après authentification réussie**
+	- Action utilisateur : saisie d'identifiants valides puis clic sur "Se connecter"
+	- Comportement HTTP : `POST /index.php` puis redirection `302` vers `/dashboard.php`
+	- Interface affichée : page privée "Authentification réussie" avec message de bienvenue et bouton/lien de déconnexion
+	- Captures associées : Annexe B et Annexe H
+
+3. **Après authentification échouée**
+	- Action utilisateur : saisie d'identifiants invalides (ex. mot de passe incorrect)
+	- Comportement HTTP : `POST /index.php` puis réponse `200 OK` sur la même page
+	- Interface affichée : retour sur le formulaire de login avec message d'erreur
+	- Message visible : "Authentification échouée : login ou mot de passe invalide."
+	- Captures associées : Annexe C et Annexe I
+
+4. **Après déconnexion**
+	- Action utilisateur : clic sur "Se déconnecter" depuis le dashboard
+	- Comportement HTTP : `GET /logout.php` puis redirection `302` vers `/index.php`
+	- Interface affichée : retour à l'écran de connexion
+
 ## 6. ANALYSE DES EN-TÊTES HTTP
 
 ### 6.1 En-têtes de requête (client → serveur)
@@ -299,6 +326,18 @@ Points à améliorer :
 ### Annexe F : État du serveur Apache
 
 ![Apache status](assets/annexe-f-apache-status.png)
+
+### Annexe G : Capture client login 1
+
+![Capture client login 1](assets/5f238136-e836-491c-9f39-54b35a830471.jpeg)
+
+### Annexe H : Capture client login 2
+
+![Capture client login 2](assets/e9921ec1-f52a-43c1-a8ab-4c02894418c4.jpeg)
+
+### Annexe I : Capture client login 3
+
+![Capture client login 3](assets/fa75b434-2236-4209-b48e-33fcf526d422.jpeg)
 
 ---
 
