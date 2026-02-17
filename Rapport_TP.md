@@ -278,27 +278,27 @@ Points à améliorer :
 
 ### Annexe A : Page de connexion (index.php)
 
-![Page de connexion](Screenshot%20from%202026-02-17%2012-42-16.png)
+![Page de connexion](assets/annexe-a-connexion.png)
 
 ### Annexe B : Dashboard après connexion réussie
 
-![Dashboard](Screenshot%20from%202026-02-17%2012-42-47.png)
+![Dashboard](assets/annexe-b-dashboard.png)
 
 ### Annexe C : Message d'erreur après échec
 
-![Erreur](Screenshot%20from%202026-02-17%2012-43-42.png)
+![Erreur](assets/annexe-c-erreur.png)
 
 ### Annexe D : Capture Wireshark complète
 
-![Wireshark](Screenshot%20from%202026-02-17%2012-45-30.png)
+![Wireshark](assets/annexe-d-wireshark.png)
 
 ### Annexe E : Structure de la base de données
 
-![phpMyAdmin](Screenshot%20from%202026-02-16%2022-30-58.png)
+![phpMyAdmin](assets/annexe-e-phpmyadmin.png)
 
 ### Annexe F : État du serveur Apache
 
-![Apache status](Screenshot%20from%202026-02-16%2022-31-16.png)
+![Apache status](assets/annexe-f-apache-status.png)
 
 ---
 
