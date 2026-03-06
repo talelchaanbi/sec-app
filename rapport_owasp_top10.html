@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>OWASP Top 10 – 2021 vs 2025</title>
+<style>
+  :root {
+    --primary:   #1e3a5f;
+    --accent:    #2563eb;
+    --green:     #16a34a;
+    --red:       #b91c1c;
+    --orange:    #d97706;
+    --purple:    #7c3aed;
+    --teal:      #0d9488;
+    --light-bg:  #f1f5f9;
+    --border:    #cbd5e1;
+    --text:      #1e293b;
+    --muted:     #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background: #fff;
+    font-size: 9.5pt;
+    line-height: 1.5;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    width: 100%;
+    min-height: 297mm;
+    background: linear-gradient(145deg, #0f2849 0%, #1e3a5f 45%, #7c3aed 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+    page: cover-page;
+    position: relative;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .cover-logo {
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.12);
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    font-size: 50px;
+  }
+  .cover-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 30px;
+    padding: 6px 22px;
+    font-size: 9pt;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .cover h1 {
+    font-size: 32pt;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .cover h2 {
+    font-size: 13pt;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 36px;
+  }
+  .cover-divider {
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    border-radius: 2px;
+    margin: 20px auto;
+  }
+  .cover-meta {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 20px 40px;
+    color: rgba(255,255,255,0.9);
+    font-size: 10pt;
+    line-height: 2.1;
+  }
+  .cover-meta strong { color: #fff; }
+  .cover-footer {
+    position: absolute;
+    bottom: 30px;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+  .cover-year-badges {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 28px;
+  }
+  .year-badge {
+    padding: 10px 28px;
+    border-radius: 8px;
+    font-size: 14pt;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .year-badge.y2021 { background: rgba(37,99,235,0.5); border: 2px solid rgba(37,99,235,0.8); }
+  .year-badge.y2025 { background: rgba(124,58,237,0.5); border: 2px solid rgba(124,58,237,0.8); }
+  .vs-text { font-size: 18pt; font-weight: 800; color: rgba(255,255,255,0.6); align-self: center; }
+
+  /* ── CONTENT PAGES ── */
+  .page {
+    padding: 0 0 8mm 0;
+    page: content-page;
+  }
+
+  /* ── RUNNING HEADER ── */
+  .running-header {
+    position: running(pageHeader);
+    width: 100%;
+    border-bottom: 2.5px solid var(--primary);
+    padding-bottom: 5pt;
+    font-size: 8pt;
+  }
+  .running-header table { width: 100%; border-collapse: collapse; border: none; margin: 0; padding: 0; }
+  .running-header td    { border: none !important; padding: 0 !important; background: transparent !important;
+                          font-size: 8pt; vertical-align: middle; }
+  .running-header .rh-left  { color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .running-header .rh-right { color: var(--accent); font-weight: 700; text-align: right; }
+
+  /* ── SECTION TITLES ── */
+  h2.section-title {
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    break-after: avoid;
+    page-break-after: avoid;
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+  h2.section-title .num {
+    display: inline-flex;
+    min-width: 26px; height: 26px;
+    padding: 0 6px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 13px;
+    font-size: 9pt;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  h2.section-title .num.purple { background: var(--purple); }
+  h2.section-title .num.teal   { background: var(--teal); }
+
+  .section-line {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    margin-bottom: 10px;
+    border-radius: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .section-line.purple { background: linear-gradient(90deg, var(--purple), transparent); }
+  .section-line.teal   { background: linear-gradient(90deg, var(--teal), transparent); }
+
+  h3.sub-title {
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 10px 0 6px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  h3.sub-title.purple { border-color: var(--purple); }
+  h3.sub-title.teal   { border-color: var(--teal); }
+
+  p { margin-bottom: 6px; }
+
+  /* ── INFO BOXES ── */
+  .info-box {
+    background: #eff6ff;
+    border-left: 4px solid var(--accent);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .warn-box {
+    background: #fefce8;
+    border-left: 4px solid var(--orange);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .danger-box {
+    background: #fef2f2;
+    border-left: 4px solid var(--red);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .success-box {
+    background: #f0fdf4;
+    border-left: 4px solid var(--green);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .purple-box {
+    background: #f5f3ff;
+    border-left: 4px solid var(--purple);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 8.5pt; }
+  thead { display: table-header-group; }
+  th { background: var(--primary); color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--light-bg); }
+
+  /* comparison table specific */
+  .cmp-table th.h2021 { background: #1d4ed8; }
+  .cmp-table th.h2025 { background: #6d28d9; }
+  .cmp-table td.rank { font-weight: 700; text-align: center; width: 40px; }
+  .cmp-table .cat-2021 { color: #1d4ed8; font-weight: 600; }
+  .cmp-table .cat-2025 { color: #6d28d9; font-weight: 600; }
+  .cmp-table .move-badge { font-size: 7.5pt; display: inline-block; border-radius: 12px; padding: 1px 7px; margin-left: 4px; }
+  .move-up   { background: #dcfce7; color: #166534; }
+  .move-down { background: #fee2e2; color: #991b1b; }
+  .move-new  { background: #f5f3ff; color: #5b21b6; }
+  .move-same { background: #f1f5f9; color: #475569; }
+
+  /* ── BADGES ── */
+  .badge { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 8pt; font-weight: 600; margin: 2px; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-orange { background: #fef3c7; color: #92400e; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .badge-teal   { background: #ccfbf1; color: #0f766e; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 12px 0; }
+  .sum-card {
+    border-radius: 8px;
+    padding: 12px 8px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .sum-card .num { font-size: 20pt; font-weight: 800; line-height: 1; }
+  .sum-card .lbl { font-size: 7.5pt; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .sum-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
+  .sum-card.blue   .num { color: var(--accent); }
+  .sum-card.purple { background: #f5f3ff; border-color: #ddd6fe; }
+  .sum-card.purple .num { color: var(--purple); }
+  .sum-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+  .sum-card.green  .num { color: var(--green); }
+  .sum-card.orange { background: #fffbeb; border-color: #fde68a; }
+  .sum-card.orange .num { color: var(--orange); }
+
+  /* ── TOC ── */
+  .toc-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted var(--border); font-size: 9.5pt; break-inside: avoid; page-break-inside: avoid; }
+  .toc-item .toc-num { color: var(--accent); font-weight: 700; min-width: 28px; }
+
+  /* ── VULN DEEP-DIVE CARD ── */
+  .vuln-deep {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .vuln-deep .vd-header {
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 10.5pt;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+  }
+  .vuln-deep .vd-header.blue   { background: linear-gradient(90deg, #1d4ed8, #2563eb); }
+  .vuln-deep .vd-header.purple { background: linear-gradient(90deg, #5b21b6, #7c3aed); }
+  .vuln-deep .vd-body { padding: 10px 14px; }
+  .vuln-deep .vd-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .vuln-deep .vd-stat {
+    background: var(--light-bg);
+    border-radius: 6px;
+    padding: 6px 8px;
+    text-align: center;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .vuln-deep .vd-stat .s-val { font-size: 11pt; font-weight: 700; color: var(--primary); }
+  .vuln-deep .vd-stat .s-lbl { font-size: 7pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── PREVENTION LIST ── */
+  .prev-list { list-style: none; padding: 0; margin: 4px 0; }
+  .prev-list li { padding: 3px 0 3px 22px; position: relative; font-size: 8.8pt; border-bottom: 1px solid #f1f5f9; break-inside: avoid; }
+  .prev-list li::before { content: '✓'; position: absolute; left: 4px; color: var(--green); font-weight: 700; }
+
+  /* ── SCENARIO BLOCK ── */
+  .scenario {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-size: 8.8pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .scenario .s-label { font-weight: 700; color: var(--orange); margin-bottom: 3px; font-size: 8.5pt; }
+
+  /* ── CONCLUSION CARD ── */
+  .conclu-box {
+    background: linear-gradient(135deg, #0f2849, #1e3a5f);
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 10px 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .conclu-box h3 { color: #93c5fd; margin-bottom: 6px; font-size: 11pt; }
+  .conclu-box p  { color: rgba(255,255,255,0.85); font-size: 9pt; margin-bottom: 4px; }
+
+  /* ── EVOLUTION TIMELINE ── */
+  .timeline-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    margin: 10px 0;
+    align-items: stretch;
+  }
+  .tl-col {
+    border-radius: 8px;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .tl-col .tl-header {
+    padding: 7px 10px;
+    font-weight: 700;
+    font-size: 9.5pt;
+    color: #fff;
+    text-align: center;
+  }
+  .tl-col.col2021 .tl-header { background: #1d4ed8; }
+  .tl-col.col2025 .tl-header { background: #6d28d9; }
+  .tl-col .tl-body { padding: 6px 10px; background: var(--light-bg); }
+  .tl-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18pt;
+    color: var(--muted);
+  }
+
+  /* ── @PAGE RULES ── */
+  @page cover-page {
+    size: A4;
+    margin: 0;
+  }
+  @page content-page {
+    size: A4;
+    margin: 20mm 15mm 14mm 15mm;
+    @top-left {
+      content: element(pageHeader);
+      vertical-align: bottom;
+      padding-bottom: 4pt;
+      width: 100%;
+    }
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Running Header – affiché automatiquement sur chaque page content-page -->
+<div class="running-header">
+  <table><tr>
+    <td class="rh-left">OWASP Top 10 &ndash; 2021 vs 2025 &ndash; Talel Chaanbi</td>
+    <td class="rh-right">&#128737; Sécurité Applicative</td>
+  </tr></table>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE DE COUVERTURE
+══════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">⚠</div>
+  <div class="cover-badge">Sécurité Applicative – Compte Rendu</div>
+  <h1>OWASP Top 10</h1>
+  <h2>Analyse Comparative &amp; Étude Approfondie</h2>
+  <div class="cover-year-badges">
+    <div class="year-badge y2021">2021</div>
+    <div class="vs-text">vs</div>
+    <div class="year-badge y2025">2025</div>
+  </div>
+  <div class="cover-divider"></div>
+  <p style="color:rgba(255,255,255,0.6); font-size:9pt; margin-bottom:22px;">
+    Explication des <strong style="color:#c4b5fd;">TOP 3</strong> de chaque édition et analyse des évolutions
+  </p>
+  <div class="cover-meta">
+    <strong>Étudiant :</strong> Talel Chaanbi<br>
+    <strong>Module :</strong> Sécurité des Applications Web<br>
+    <strong>Sujet :</strong> OWASP Top 10 2021 vs 2025 – TOP 3 de chaque édition<br>
+    <strong>Date :</strong> 06 Mars 2026
+  </div>
+  <div class="cover-footer">CONFIDENTIEL – Usage académique uniquement</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 – TABLE DES MATIÈRES + INTRODUCTION
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">📋</span>Table des Matières</h2>
+  <div class="section-line"></div>
+
+  <div class="toc-item"><span><span class="toc-num">1.</span> Introduction à l'OWASP Top 10</span><span style="color:var(--muted)">2</span></div>
+  <div class="toc-item"><span><span class="toc-num">2.</span> Tableau Comparatif Complet – 2021 vs 2025</span><span style="color:var(--muted)">3</span></div>
+  <div class="toc-item"><span><span class="toc-num">3.</span> TOP 3 OWASP 2021 – A01 : Broken Access Control</span><span style="color:var(--muted)">4</span></div>
+  <div class="toc-item"><span><span class="toc-num">4.</span> TOP 3 OWASP 2021 – A02 : Cryptographic Failures</span><span style="color:var(--muted)">5</span></div>
+  <div class="toc-item"><span><span class="toc-num">5.</span> TOP 3 OWASP 2021 – A03 : Injection</span><span style="color:var(--muted)">6</span></div>
+  <div class="toc-item"><span><span class="toc-num">6.</span> TOP 3 OWASP 2025 – A01 : Broken Access Control</span><span style="color:var(--muted)">7</span></div>
+  <div class="toc-item"><span><span class="toc-num">7.</span> TOP 3 OWASP 2025 – A02 : Security Misconfiguration</span><span style="color:var(--muted)">8</span></div>
+  <div class="toc-item"><span><span class="toc-num">8.</span> TOP 3 OWASP 2025 – A03 : Software Supply Chain Failures</span><span style="color:var(--muted)">9</span></div>
+  <div class="toc-item"><span><span class="toc-num">9.</span> Analyse Comparative et Évolutions Clés</span><span style="color:var(--muted)">10</span></div>
+  <div class="toc-item"><span><span class="toc-num">10.</span> Conclusion &amp; Recommandations</span><span style="color:var(--muted)">11</span></div>
+
+  <br>
+  <div class="summary-grid">
+    <div class="sum-card blue"><div class="num">10</div><div class="lbl">Catégories 2021</div></div>
+    <div class="sum-card purple"><div class="num">10</div><div class="lbl">Catégories 2025</div></div>
+    <div class="sum-card green"><div class="num">1</div><div class="lbl">Nouvelle catégorie 2025</div></div>
+    <div class="sum-card orange"><div class="num">3</div><div class="lbl">Changements majeurs</div></div>
+  </div>
+
+  <h2 class="section-title" style="margin-top:16px;"><span class="num">1</span>Introduction à l'OWASP Top 10</h2>
+  <div class="section-line"></div>
+
+  <p>L'<strong>Open Web Application Security Project (OWASP)</strong> est une fondation à but non lucratif dédiée à l'amélioration de la sécurité des logiciels. Son document le plus célèbre, l'<strong>OWASP Top 10</strong>, est une liste des dix risques de sécurité les plus critiques pour les applications web.</p>
+
+  <div class="info-box">
+    <strong>📌 Objectif du Top 10 :</strong> Sensibiliser les développeurs, architectes, et organisations aux risques de sécurité les plus répandus et les plus impactants, basé sur des données réelles issues de tests d'intrusion et d'audits à l'échelle mondiale.
+  </div>
+
+  <p>La liste est mise à jour périodiquement pour refléter l'évolution du paysage des menaces. La version <strong>2021</strong> a introduit plusieurs nouvelles catégories (Insecure Design, SSRF) ; la version <strong>2025</strong> reflète la montée en puissance des risques liés à la chaîne logistique logicielle (Supply Chain) et la prévalence croissante des mauvaises configurations.</p>
+
+  <div class="warn-box">
+    <strong>⚠ Méthodologie :</strong> Les catégories sont classées selon des critères statistiques (taux d'incidence, nombre d'occurrences, CVEs associées) et des évaluations d'impact (exploitabilité, impact moyen pondéré), issus de contributions de centaines d'organisations mondiales.
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 3 – TABLEAU COMPARATIF COMPLET
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">2</span>Tableau Comparatif Complet – 2021 vs 2025</h2>
+  <div class="section-line"></div>
+
+  <table class="cmp-table">
+    <thead>
+      <tr>
+        <th style="width:40px; text-align:center;">#</th>
+        <th class="h2021">OWASP Top 10 : 2021</th>
+        <th class="h2025">OWASP Top 10 : 2025</th>
+        <th style="width:90px;">Évolution</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rank">1</td>
+        <td class="cat-2021">A01 – Broken Access Control</td>
+        <td class="cat-2025">A01 – Broken Access Control</td>
+        <td><span class="move-badge move-same">= Stable</span></td>
+      </tr>
+      <tr>
+        <td class="rank">2</td>
+        <td class="cat-2021">A02 – Cryptographic Failures</td>
+        <td class="cat-2025">A02 – Security Misconfiguration</td>
+        <td><span class="move-badge move-up">↑ #5→#2</span></td>
+      </tr>
+      <tr>
+        <td class="rank">3</td>
+        <td class="cat-2021">A03 – Injection</td>
+        <td class="cat-2025">A03 – Software Supply Chain Failures</td>
+        <td><span class="move-badge move-new">🆕 Nouveau</span></td>
+      </tr>
+      <tr>
+        <td class="rank">4</td>
+        <td class="cat-2021">A04 – Insecure Design</td>
+        <td class="cat-2025">A04 – Cryptographic Failures</td>
+        <td><span class="move-badge move-down">↓ #2→#4</span></td>
+      </tr>
+      <tr>
+        <td class="rank">5</td>
+        <td class="cat-2021">A05 – Security Misconfiguration</td>
+        <td class="cat-2025">A05 – Injection</td>
+        <td><span class="move-badge move-down">↓ #3→#5</span></td>
+      </tr>
+      <tr>
+        <td class="rank">6</td>
+        <td class="cat-2021">A06 – Vulnerable &amp; Outdated Components</td>
+        <td class="cat-2025">A06 – Insecure Design</td>
+        <td><span class="move-badge move-down">↓ #4→#6</span></td>
+      </tr>
+      <tr>
+        <td class="rank">7</td>
+        <td class="cat-2021">A07 – Identification &amp; Auth. Failures</td>
+        <td class="cat-2025">A07 – Authentication Failures</td>
+        <td><span class="move-badge move-same">≈ Renommé</span></td>
+      </tr>
+      <tr>
+        <td class="rank">8</td>
+        <td class="cat-2021">A08 – Software &amp; Data Integrity Failures</td>
+        <td class="cat-2025">A08 – Software or Data Integrity Failures</td>
+        <td><span class="move-badge move-same">= Stable</span></td>
+      </tr>
+      <tr>
+        <td class="rank">9</td>
+        <td class="cat-2021">A09 – Security Logging &amp; Monitoring Failures</td>
+        <td class="cat-2025">A09 – Security Logging &amp; Alerting Failures</td>
+        <td><span class="move-badge move-same">≈ Renommé</span></td>
+      </tr>
+      <tr>
+        <td class="rank">10</td>
+        <td class="cat-2021">A10 – Server-Side Request Forgery (SSRF)</td>
+        <td class="cat-2025">A10 – Mishandling of Exceptional Conditions</td>
+        <td><span class="move-badge move-new">🆕 Nouveau</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box" style="margin-top:10px;">
+    <strong>📊 Changements clés de 2021 → 2025 :</strong><br>
+    • <span class="badge badge-purple">🆕 Nouveau</span> <strong>A03:2025 Software Supply Chain Failures</strong> — reflète la menace croissante des attaques de la chaîne d'approvisionnement (SolarWinds, Log4Shell, Bybit 2025).<br>
+    • <span class="badge badge-purple">🆕 Nouveau</span> <strong>A10:2025 Mishandling of Exceptional Conditions</strong> — gestion défaillante des erreurs et exceptions.<br>
+    • <span class="badge badge-blue">↑ Montée</span> <strong>Security Misconfiguration</strong> passe de #5 à #2 — 100% des applications testées sont affectées.<br>
+    • <span class="badge badge-orange">↓ Descente</span> <strong>Cryptographic Failures</strong> (#2→#4) et <strong>Injection</strong> (#3→#5) — recul relatif mais toujours critiques.
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 4 – A01:2021 BROKEN ACCESS CONTROL
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num" style="background:#1d4ed8;">3</span>TOP 3 OWASP 2021 – A01 : Broken Access Control</h2>
+  <div class="section-line"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header blue">
+      <span style="font-size:16pt;">🔓</span>
+      <div>
+        <div>A01:2021 – Broken Access Control</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Monté du rang #5 (2017) → #1 (2021) — Catégorie la plus critique</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">34</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">318 487</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">94%</div><div class="s-lbl">Apps vulnérables</div></div>
+      </div>
+
+      <h3 class="sub-title">Définition</h3>
+      <p>Le Broken Access Control survient lorsqu'une application ne restreint pas correctement l'accès aux ressources selon les permissions des utilisateurs. Les utilisateurs peuvent ainsi agir en dehors de leurs droits, accédant à des données ou fonctions qui ne leur sont pas autorisées.</p>
+
+      <h3 class="sub-title">Vecteurs d'attaque principaux</h3>
+      <ul class="prev-list">
+        <li>Violation du principe du moindre privilège — accès accordé à n'importe qui par défaut</li>
+        <li><strong>IDOR</strong> (Insecure Direct Object References) — manipulation de l'identifiant pour accéder aux données d'un autre utilisateur</li>
+        <li><strong>Force browsing</strong> — navigation directe vers des URLs non référencées mais accessibles</li>
+        <li>Manipulation de JWT (JSON Web Token) pour élever les privilèges</li>
+        <li>Mauvaise configuration CORS permettant l'accès depuis des origines non autorisées</li>
+        <li>Absence de contrôle d'accès sur les méthodes POST, PUT, DELETE des APIs</li>
+      </ul>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario d'attaque concret</div>
+        Un attaquant modifie le paramètre <code style="background:#f1f5f9; padding:1px 4px; border-radius:3px;">acct</code> dans l'URL :<br>
+        <code style="background:#1e293b; color:#e2e8f0; padding:4px 8px; display:block; border-radius:4px; margin:4px 0; font-size:8pt;">https://bank.com/app/accountInfo?acct=notmyacct</code>
+        Sans vérification côté serveur, l'attaquant accède au compte de n'importe quelle victime.
+      </div>
+
+      <h3 class="sub-title">Mesures de prévention</h3>
+      <ul class="prev-list">
+        <li>Appliquer le <strong>refus par défaut</strong> — n'autoriser l'accès qu'aux ressources explicitement permises</li>
+        <li>Implémenter les contrôles d'accès côté serveur uniquement (jamais côté client)</li>
+        <li>Invalider les sessions côté serveur à la déconnexion</li>
+        <li>Journaliser les échecs d'accès et alerter en cas de répétition</li>
+        <li>Limiter le débit (rate limiting) pour les APIs afin de réduire l'impact des attaques automatisées</li>
+        <li>Inclure des tests unitaires et d'intégration pour les contrôles d'accès</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés :</strong> CWE-200 (Exposition d'informations à un acteur non autorisé), CWE-201, CWE-352 (CSRF), CWE-284 (Contrôle d'accès inapproprié), CWE-862 (Autorisation manquante)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 5 – A02:2021 CRYPTOGRAPHIC FAILURES
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num" style="background:#1d4ed8;">4</span>TOP 3 OWASP 2021 – A02 : Cryptographic Failures</h2>
+  <div class="section-line"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header blue">
+      <span style="font-size:16pt;">🔑</span>
+      <div>
+        <div>A02:2021 – Cryptographic Failures</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Anciennement "Sensitive Data Exposure" — renommé pour cibler la cause racine</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">29</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">233 788</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">4.49%</div><div class="s-lbl">Taux d'incidence moy.</div></div>
+      </div>
+
+      <h3 class="sub-title">Définition</h3>
+      <p>Les Cryptographic Failures désignent les défaillances dans l'utilisation (ou l'absence) de mécanismes cryptographiques pour protéger les données sensibles au repos et en transit. Ces failles conduisent souvent à l'exposition de données personnelles, financières ou de mots de passe.</p>
+
+      <h3 class="sub-title">Causes fréquentes</h3>
+      <ul class="prev-list">
+        <li>Transmission de données en <strong>texte clair</strong> via HTTP, SMTP ou FTP sans chiffrement</li>
+        <li>Utilisation d'algorithmes obsolètes : <strong>MD5, SHA-1, DES, RC4</strong></li>
+        <li>Mots de passe stockés sans hachage ou avec un hachage non salé (table arc-en-ciel possible)</li>
+        <li>Clés cryptographiques codées en dur dans le code source</li>
+        <li>Mode de chiffrement ECB (déterministe, révèle des patterns)</li>
+        <li>Vecteurs d'initialisation (IV) réutilisés ou prévisibles</li>
+      </ul>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario d'attaque concret</div>
+        Une base de données contient des mots de passe hachés avec MD5 sans sel. Un attaquant qui exfiltre la base peut casser tous les mots de passe en moins d'une heure avec une table arc-en-ciel, car MD5 est rapide et ses collisions sont connues. Avec bcrypt (coût=12), la même attaque prendrait des années.
+      </div>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 2 – Attaque Man-in-the-Middle</div>
+        Un site web ne force pas HTTPS sur toutes ses pages. Un attaquant sur un réseau Wi-Fi public intercepte le trafic HTTP, capture le cookie de session et se connecte en tant que l'utilisateur légitime (session hijacking).
+      </div>
+
+      <h3 class="sub-title">Mesures de prévention</h3>
+      <ul class="prev-list">
+        <li>Classifier les données selon leur sensibilité et appliquer des contrôles adaptés</li>
+        <li>Ne jamais stocker de données sensibles inutilement — supprimer dès que possible</li>
+        <li>Utiliser <strong>TLS 1.2+</strong> avec <strong>HSTS</strong> (HTTP Strict Transport Security) pour toutes les communications</li>
+        <li>Hacher les mots de passe avec <strong>bcrypt, scrypt, Argon2 ou PBKDF2</strong> (algorithmes adaptatifs)</li>
+        <li>Utiliser des algorithmes modernes : <strong>AES-256-GCM, RSA-OAEP, ChaCha20</strong></li>
+        <li>Générer les clés et IV avec un <strong>CSPRNG</strong> (générateur pseudo-aléatoire cryptographiquement sûr)</li>
+        <li>Désactiver le cache pour les réponses contenant des données sensibles</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés :</strong> CWE-259 (Mot de passe codé en dur), CWE-327 (Algorithme cryptographique cassé), CWE-331 (Entropie insuffisante), CWE-916 (Hachage sans effort computationnel suffisant), CWE-319 (Transmission en clair)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 6 – A03:2021 INJECTION
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num" style="background:#1d4ed8;">5</span>TOP 3 OWASP 2021 – A03 : Injection</h2>
+  <div class="section-line"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header blue">
+      <span style="font-size:16pt;">💉</span>
+      <div>
+        <div>A03:2021 – Injection</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Descendu du rang #1 (2017) → #3 (2021) — Reste une menace critique et très répandue</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">33</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">274 228</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">32 078</div><div class="s-lbl">CVEs référencées</div></div>
+      </div>
+
+      <h3 class="sub-title">Définition</h3>
+      <p>Une injection se produit lorsque des données non fiables fournies par un utilisateur sont envoyées à un interpréteur (SQL, OS, LDAP, etc.) dans le cadre d'une commande ou requête. L'attaquant peut ainsi manipuler l'interpréteur pour exécuter des commandes non prévues, accéder, modifier ou supprimer des données.</p>
+
+      <div class="timeline-grid" style="margin:8px 0;">
+        <div class="tl-col col2021">
+          <div class="tl-header">Types d'injection courants</div>
+          <div class="tl-body" style="font-size:8.5pt;">
+            <p>🔸 <strong>SQL Injection</strong> — manipulation de requêtes SQL</p>
+            <p>🔸 <strong>OS Command Injection</strong> — exécution de commandes système</p>
+            <p>🔸 <strong>LDAP Injection</strong> — contournement d'annuaires</p>
+            <p>🔸 <strong>XSS</strong> — injection de scripts dans les pages web</p>
+            <p>🔸 <strong>NoSQL Injection</strong> — MongoDB, CouchDB</p>
+            <p>🔸 <strong>Expression Language Injection</strong></p>
+          </div>
+        </div>
+        <div class="tl-arrow">→</div>
+        <div class="tl-col col2025">
+          <div class="tl-header" style="background:#16a34a;">Conditions de vulnérabilité</div>
+          <div class="tl-body" style="font-size:8.5pt;">
+            <p>✗ Données non validées ni filtrées</p>
+            <p>✗ Requêtes dynamiques sans paramétrage</p>
+            <p>✗ Concaténation directe de l'entrée utilisateur</p>
+            <p>✗ Confiance aveugle aux ORM (Hibernate, etc.)</p>
+            <p>✗ Absence de tests SAST/DAST en CI/CD</p>
+            <p>✗ Messages d'erreur révélant la structure DB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario d'attaque – SQL Injection classique</div>
+        Code vulnérable : <code style="background:#1e293b; color:#e2e8f0; padding:3px 6px; border-radius:3px; font-size:8pt;">SELECT * FROM users WHERE id='</code> + user_input + <code style="background:#1e293b; color:#e2e8f0; padding:3px 6px; border-radius:3px; font-size:8pt;">'</code><br>
+        Payload injecté : <code style="background:#fef2f2; color:#991b1b; padding:3px 6px; border-radius:3px; font-size:8pt;">' UNION SELECT username,password,null FROM users--</code><br>
+        Résultat : tous les mots de passe sont extraits de la base en une seule requête.
+      </div>
+
+      <h3 class="sub-title">Mesures de prévention</h3>
+      <ul class="prev-list">
+        <li>Utiliser des <strong>requêtes paramétrées</strong> (prepared statements) — méthode préférée</li>
+        <li>Recourir aux <strong>ORM</strong> sécurisés (Hibernate, ActiveRecord) plutôt qu'au SQL brut</li>
+        <li>Valider les entrées côté serveur avec une liste blanche (whitelist)</li>
+        <li>Échapper les caractères spéciaux pour chaque interpréteur cible</li>
+        <li>Intégrer des outils <strong>SAST et DAST</strong> dans la pipeline CI/CD</li>
+        <li>Appliquer le principe du moindre privilège sur les comptes de base de données</li>
+        <li>Ne jamais exposer les messages d'erreur détaillés (stack traces) à l'utilisateur</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés :</strong> CWE-89 (SQL Injection), CWE-79 (XSS), CWE-78 (OS Command Injection), CWE-94 (Code Injection), CWE-20 (Validation d'entrée insuffisante)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 7 – A01:2025 BROKEN ACCESS CONTROL
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num purple">6</span>TOP 3 OWASP 2025 – A01 : Broken Access Control</h2>
+  <div class="section-line purple"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header purple">
+      <span style="font-size:16pt;">🔓</span>
+      <div>
+        <div>A01:2025 – Broken Access Control</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Maintenu en #1 pour la 2ème édition consécutive — Portée élargie en 2025</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">40</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">1 839 701</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">100%</div><div class="s-lbl">Apps testées affectées</div></div>
+      </div>
+
+      <div class="danger-box">
+        <strong>⚠ Évolution 2021 → 2025 :</strong> Le nombre de CWEs mappés est passé de <strong>34 → 40</strong> et les occurrences ont explosé de <strong>318 487 → 1 839 701</strong> (×5,8). La catégorie intègre désormais explicitement le SSRF (CWE-918) et d'autres vecteurs émergents.
+      </div>
+
+      <h3 class="sub-title purple">Nouveautés 2025</h3>
+      <p>En 2025, 100% des applications testées présentent une forme de Broken Access Control, contre 94% en 2021. Les APIs REST et GraphQL ont considérablement élargi la surface d'attaque. Le SSRF (Server-Side Request Forgery), qui était une catégorie séparée en A10:2021, est maintenant intégré dans A01:2025 via CWE-918.</p>
+
+      <h3 class="sub-title purple">Vecteurs d'attaque principaux (2025)</h3>
+      <ul class="prev-list">
+        <li>Violation du moindre privilège — APIs exposant des données sans contrôle d'autorisation</li>
+        <li>IDOR sur les APIs REST : <code style="background:#f1f5f9; padding:1px 4px; border-radius:3px;">GET /api/users/1234/profile</code> → modification en <code style="background:#f1f5f9; padding:1px 4px; border-radius:3px;">/api/users/1235/profile</code></li>
+        <li>JWT mal configuré — algorithme "none" ou secret faible permettant la falsification de tokens</li>
+        <li>CORS permissif — <code style="background:#f1f5f9; padding:1px 4px; border-radius:3px;">Access-Control-Allow-Origin: *</code> sur des APIs authentifiées</li>
+        <li>SSRF (CWE-918) — l'application accède à des ressources internes sur requête de l'attaquant</li>
+        <li>CSRF (CWE-352) — actions exécutées à l'insu de l'utilisateur connecté</li>
+      </ul>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario d'attaque 2025 – IDOR sur API GraphQL</div>
+        Un attaquant authentifié modifie la requête GraphQL en changeant l'ID utilisateur :<br>
+        <code style="background:#1e293b; color:#e2e8f0; padding:4px 8px; display:block; border-radius:4px; margin:4px 0; font-size:8pt;">query { user(id: "victim_id") { email, phone, creditCard { number } } }</code>
+        Sans contrôle d'autorisation au niveau objet, il récupère les données bancaires d'un autre client.
+      </div>
+
+      <h3 class="sub-title purple">Mesures de prévention (2025)</h3>
+      <ul class="prev-list">
+        <li>Refus par défaut — tout accès non explicitement autorisé est bloqué</li>
+        <li>Contrôles d'accès centralisés côté serveur, réutilisés dans toute l'application</li>
+        <li>Invalider les sessions JWT/tokens côté serveur à la déconnexion (blacklist ou rotation)</li>
+        <li>Journaliser et alerter les échecs d'accès répétés (brute force d'IDOR)</li>
+        <li>Rate limiting sur toutes les APIs</li>
+        <li>Tester automatiquement les contrôles d'accès dans la CI/CD</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés 2025 :</strong> CWE-200, CWE-201, CWE-352 (CSRF), CWE-918 (SSRF), CWE-284, CWE-862, CWE-639 (IDOR), CWE-1275 (SameSite Cookie)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 8 – A02:2025 SECURITY MISCONFIGURATION
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num purple">7</span>TOP 3 OWASP 2025 – A02 : Security Misconfiguration</h2>
+  <div class="section-line purple"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header purple">
+      <span style="font-size:16pt;">⚙</span>
+      <div>
+        <div>A02:2025 – Security Misconfiguration</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Montée de #5 (2021) → #2 (2025) — 100% des applications affectées</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">16</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">719 084</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">1 375</div><div class="s-lbl">CVEs référencées</div></div>
+      </div>
+
+      <div class="warn-box">
+        <strong>📈 Montée en flèche :</strong> La Security Misconfiguration passe de la 5ème à la 2ème place en 2025. La multiplication des services cloud, des microservices et des configurations complexes rend les erreurs de configuration de plus en plus fréquentes et impactantes.
+      </div>
+
+      <h3 class="sub-title purple">Définition</h3>
+      <p>La misconfiguration de sécurité survient lorsqu'un système, une application ou un service cloud est configuré de façon incorrecte du point de vue de la sécurité. Cela crée des vulnérabilités exploitables sans nécessiter de compétences avancées en exploitation.</p>
+
+      <h3 class="sub-title purple">Formes courantes de misconfiguration</h3>
+      <ul class="prev-list">
+        <li>Absence de durcissement (hardening) des serveurs, conteneurs et services cloud</li>
+        <li><strong>Comptes par défaut</strong> non supprimés ou mots de passe par défaut non changés</li>
+        <li>Messages d'erreur détaillés (stack traces) renvoyés aux utilisateurs</li>
+        <li>Fonctionnalités inutiles activées : ports ouverts, services non nécessaires, frameworks de test</li>
+        <li>En-têtes de sécurité HTTP absents ou mal configurés (CSP, X-Frame-Options, HSTS)</li>
+        <li>Permissions de buckets S3 ou stockages cloud ouvertes au public</li>
+        <li>Mode debug activé en production (exposant variables d'environnement et secrets)</li>
+        <li>Secrets et credentials intégrés dans les pipelines CI/CD ou fichiers de configuration</li>
+      </ul>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 1 – Console d'administration exposée</div>
+        Un serveur d'application laisse la console d'administration accessible avec les identifiants par défaut (admin/admin). Un attaquant scanne les paths courants, trouve <code style="background:#f1f5f9; padding:1px 4px; border-radius:3px;">/admin</code> et prend le contrôle total du serveur.
+      </div>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 2 – Bucket S3 public</div>
+        Un fournisseur cloud configure par défaut les permissions de partage "ouvertes à internet". Des données clients sensibles stockées dans un bucket S3 deviennent accessibles publiquement sans authentification.
+      </div>
+
+      <h3 class="sub-title purple">Mesures de prévention</h3>
+      <ul class="prev-list">
+        <li>Processus de durcissement reproductible et automatisé pour chaque environnement (dev, QA, prod)</li>
+        <li>Plateforme minimale — supprimer toutes les fonctionnalités, composants et docs non nécessaires</li>
+        <li>Révision régulière des configurations dans le cadre du processus de patch management</li>
+        <li>Architecture segmentée — isolation des composants par conteneurisation ou ACL cloud</li>
+        <li>Envoyer des en-têtes de sécurité aux clients (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)</li>
+        <li>Vérification automatisée de l'efficacité des configurations dans tous les environnements</li>
+        <li>Utiliser la fédération d'identité et les credentials éphémères plutôt que des clés statiques</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés 2025 :</strong> CWE-16 (Configuration), CWE-611 (XXE), CWE-489 (Active Debug Code), CWE-614 (Cookie sans Secure), CWE-1004 (Cookie sans HttpOnly), CWE-942 (CORS permissif)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 9 – A03:2025 SOFTWARE SUPPLY CHAIN FAILURES
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num purple">8</span>TOP 3 OWASP 2025 – A03 : Software Supply Chain Failures</h2>
+  <div class="section-line purple"></div>
+
+  <div class="vuln-deep">
+    <div class="vd-header purple">
+      <span style="font-size:16pt;">🏭</span>
+      <div>
+        <div>A03:2025 – Software Supply Chain Failures</div>
+        <div style="font-size:8.5pt; font-weight:400; opacity:0.85;">Nouvelle catégorie — #1 dans le sondage communautaire 2025 (50% des répondants)</div>
+      </div>
+    </div>
+    <div class="vd-body">
+      <div class="vd-stats">
+        <div class="vd-stat"><div class="s-val">6</div><div class="s-lbl">CWEs mappés</div></div>
+        <div class="vd-stat"><div class="s-val">215 248</div><div class="s-lbl">Occurrences totales</div></div>
+        <div class="vd-stat"><div class="s-val">5.72%</div><div class="s-lbl">Taux d'incidence le + élevé</div></div>
+      </div>
+
+      <div class="purple-box">
+        <strong>🆕 Contexte de création :</strong> Cette catégorie élargit l'ancienne A06:2021 "Vulnerable and Outdated Components" pour couvrir l'ensemble de la chaîne logistique logicielle : dépendances, outils de build, pipelines CI/CD, registres d'artefacts, IDEs et extensions. Les attaques de supply chain ont été classées #1 dans le sondage communautaire 2025, avec <strong>exactement 50%</strong> des répondants la plaçant en première position.
+      </div>
+
+      <h3 class="sub-title purple">Définition</h3>
+      <p>Les Software Supply Chain Failures sont des compromissions ou défaillances dans le processus de construction, distribution ou mise à jour de logiciels. Elles sont souvent causées par des vulnérabilités ou des modifications malveillantes dans du code tiers, des outils ou des dépendances dont le système dépend.</p>
+
+      <h3 class="sub-title purple">Vecteurs d'attaque</h3>
+      <ul class="prev-list">
+        <li>Dépendances directes et transitives non tracées ou vulnérables</li>
+        <li>Composants non maintenus, non supportés ou non mis à jour (OS, frameworks, bibliothèques)</li>
+        <li>Pipeline CI/CD compromise — niveau de sécurité inférieur aux systèmes qu'il déploie</li>
+        <li>Absence de <strong>SBOM</strong> (Software Bill of Materials) — inventaire des dépendances</li>
+        <li>Séparation des droits insuffisante dans la chaîne de build</li>
+        <li>Composants provenant de sources non fiables ou non signés</li>
+        <li>Absence de surveillance des CVE pour les composants utilisés</li>
+      </ul>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 1 – SolarWinds (2019) — Attaque d'État</div>
+        Des acteurs malveillants ont compromis le serveur de build de SolarWinds et injecté un backdoor (SUNBURST) dans la mise à jour légitime d'Orion. Environ <strong>18 000 organisations</strong>, dont des agences gouvernementales américaines, ont installé la mise à jour empoisonnée sans le savoir.
+      </div>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 2 – Bybit Theft (2025) — Vol de 1,5 milliard $</div>
+        Une attaque supply chain ciblant un logiciel de portefeuille crypto a injecté du code malveillant qui ne s'activait que lors de transactions spécifiques. Bybit a perdu <strong>1,5 milliard de dollars</strong> en février 2025, la plus grande perte crypto de l'histoire liée à une supply chain attack.
+      </div>
+
+      <div class="scenario">
+        <div class="s-label">🎯 Scénario 3 – Log4Shell (CVE-2021-44228)</div>
+        Une vulnérabilité critique (RCE) dans Apache Log4j, bibliothèque Java présente dans des millions d'applications. Exploitable par un simple message de log. Utilisée pour des ransomwares, du cryptominage et des intrusions dans des infrastructures critiques mondiales.
+      </div>
+
+      <h3 class="sub-title purple">Mesures de prévention</h3>
+      <ul class="prev-list">
+        <li>Générer et maintenir un <strong>SBOM centralisé</strong> pour tout le logiciel produit</li>
+        <li>Suivre les dépendances directes ET transitives avec des outils comme <strong>OWASP Dependency-Track</strong></li>
+        <li>Surveiller en continu les CVE/NVD/OSV pour les composants utilisés</li>
+        <li>N'utiliser que des composants depuis des sources officielles avec des <strong>packages signés</strong></li>
+        <li>Déployer en mode échelonné (canary deployments) pour limiter l'exposition</li>
+        <li>Durcir la CI/CD avec MFA, journaux inviolables, artefacts immuables et séparation des droits</li>
+        <li>Maintenir un processus de patch régulier basé sur les risques</li>
+      </ul>
+
+      <div class="success-box">
+        <strong>✅ CWEs clés 2025 :</strong> CWE-1104 (Composants tiers non maintenus), CWE-1329 (Dépendance non mise à jour), CWE-1357 (Composant insuffisamment fiable), CWE-1395 (Dépendance à un composant tiers vulnérable)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 10 – ANALYSE COMPARATIVE
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num teal">9</span>Analyse Comparative – Évolutions Clés 2021 → 2025</h2>
+  <div class="section-line teal"></div>
+
+  <h3 class="sub-title teal">Ce qui a changé et pourquoi</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Aspect</th>
+        <th style="background:#1d4ed8;">OWASP 2021</th>
+        <th style="background:#6d28d9;">OWASP 2025</th>
+        <th>Interprétation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Menace #1</strong></td>
+        <td>Broken Access Control<br><small style="color:var(--muted);">318 487 occ.</small></td>
+        <td>Broken Access Control<br><small style="color:var(--muted);">1 839 701 occ.</small></td>
+        <td>Explosion ×5.8 des occurrences — APIs REST/GraphQL ont massifié la surface d'attaque</td>
+      </tr>
+      <tr>
+        <td><strong>Nouvelle entrée majeure</strong></td>
+        <td>SSRF (A10) — Nouvelle en 2021</td>
+        <td>Supply Chain (A03) — Nouvelle en 2025</td>
+        <td>Chaque édition reflète une menace émergente réelle (SolarWinds, Log4Shell)</td>
+      </tr>
+      <tr>
+        <td><strong>Crypto</strong></td>
+        <td>A02 — Rang #2</td>
+        <td>A04 — Rang #4</td>
+        <td>Descente relative, non disparition — la sensibilisation a progressé (adoption TLS/bcrypt)</td>
+      </tr>
+      <tr>
+        <td><strong>Injection</strong></td>
+        <td>A03 — Rang #3</td>
+        <td>A05 — Rang #5</td>
+        <td>Les ORM et requêtes paramétrées se sont généralisés, réduisant le taux d'incidence brut</td>
+      </tr>
+      <tr>
+        <td><strong>Configuration</strong></td>
+        <td>A05 — Rang #5</td>
+        <td>A02 — Rang #2</td>
+        <td>Explosion du cloud, conteneurs, microservices = plus de configurations à sécuriser</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 class="sub-title teal" style="margin-top:12px;">Tendances structurelles observées</h3>
+
+  <div class="vuln-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:8px 0;">
+    <div class="info-box" style="margin:0;">
+      <strong>🔵 Continuité (Stable)</strong><br>
+      Broken Access Control reste #1 pour la 2ème édition. Malgré la sensibilisation, les erreurs d'autorisation persistent car elles nécessitent une logique métier précise qui ne peut pas être entièrement automatisée ni détectée par des scanners.
+    </div>
+    <div class="purple-box" style="margin:0;">
+      <strong>🟣 Émergence (Nouveau 2025)</strong><br>
+      Supply Chain Failures : la sophistication des attaques s'est déplacée des applications vers l'infrastructure de développement elle-même. Attaquer un fournisseur de confiance multiplie la portée par des milliers de victimes.
+    </div>
+    <div class="warn-box" style="margin:0;">
+      <strong>🟡 Montée (Cloud Era)</strong><br>
+      Security Misconfiguration (#5→#2) : la multiplication des services cloud, des APIs, des conteneurs Docker et des pipelines CI/CD a créé des milliers de nouveaux points de configuration, dont beaucoup sont laissés avec des paramètres par défaut non sécurisés.
+    </div>
+    <div class="success-box" style="margin:0;">
+      <strong>🟢 Régression relative (Bonne nouvelle)</strong><br>
+      Injection (#1→#5) et Crypto Failures (#2→#4) régressent en rang relatif, signe que les pratiques de développement s'améliorent (ORM, bcrypt, TLS généralisés). Le défi reste la dette technique des anciens systèmes.
+    </div>
+  </div>
+
+  <h3 class="sub-title teal" style="margin-top:12px;">Corrélations entre les TOP 3</h3>
+  <div class="info-box">
+    <strong>🔗 Interdépendances importantes :</strong><br>
+    • Un <strong>A03:2025 Supply Chain Attack</strong> réussi peut déboucher sur un <strong>A01 Broken Access Control</strong> si du code malveillant modifie les contrôles d'autorisation.<br>
+    • Une <strong>A02:2025 Security Misconfiguration</strong> (CORS permissif, cookies sans SameSite) facilite directement les attaques <strong>A01</strong> (CSRF, IDOR).<br>
+    • En 2021, une <strong>A03 Injection</strong> exploite souvent une <strong>A02 Cryptographic Failure</strong> (mots de passe non hachés en base) pour amplifier l'impact.
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 11 – CONCLUSION
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num teal">10</span>Conclusion &amp; Recommandations</h2>
+  <div class="section-line teal"></div>
+
+  <div class="conclu-box">
+    <h3>Synthèse des enseignements</h3>
+    <p>L'analyse comparative des OWASP Top 10 2021 et 2025 révèle une évolution profonde du paysage des menaces. Si le Broken Access Control reste la menace numéro un, sa portée a été multipliée par 5,8 en 4 ans sous l'effet de la prolifération des APIs.</p>
+    <p>L'émergence des Software Supply Chain Failures en 3ème position souligne un changement de paradigme : les attaquants ne ciblent plus seulement les applications mais l'écosystème entier de leur développement et distribution.</p>
+    <p>La montée de la Security Misconfiguration (#5→#2) confirme que la complexité croissante des infrastructures cloud dépasse souvent la capacité des équipes à maintenir une posture de sécurité cohérente.</p>
+  </div>
+
+  <h3 class="sub-title teal">Recommandations Prioritaires</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Priorité</th>
+        <th>Action recommandée</th>
+        <th>Catégorie ciblée</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-red">🔴 Critique</span></td>
+        <td>Implémenter des contrôles d'accès centralisés côté serveur avec tests automatisés dans CI/CD</td>
+        <td>A01 (2021 &amp; 2025)</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-red">🔴 Critique</span></td>
+        <td>Générer un SBOM et mettre en place la surveillance continue des CVE de toutes les dépendances</td>
+        <td>A03:2025</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-orange">🟠 Haute</span></td>
+        <td>Automatiser le hardening des configurations avec des benchmarks CIS et vérifications régulières</td>
+        <td>A02:2025</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-orange">🟠 Haute</span></td>
+        <td>Remplacer tous les hachages MD5/SHA-1 par bcrypt/Argon2, forcer TLS 1.2+ avec HSTS</td>
+        <td>A02:2021 / A04:2025</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">🔵 Moyenne</span></td>
+        <td>Migrer vers des requêtes paramétrées et ORM sécurisés, intégrer SAST/DAST dans CI/CD</td>
+        <td>A03:2021 / A05:2025</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">🔵 Moyenne</span></td>
+        <td>Durcir la pipeline CI/CD avec MFA, séparation des droits et artefacts signés</td>
+        <td>A03:2025</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-green">🟢 Bonne pratique</span></td>
+        <td>Former les développeurs aux principes OWASP et intégrer la sécurité dans le cycle de développement (DevSecOps)</td>
+        <td>Global</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="info-box" style="margin-top:12px;">
+    <strong>📚 Ressources officielles :</strong><br>
+    • OWASP Top 10 2021 : <strong>owasp.org/Top10/2021/</strong><br>
+    • OWASP Top 10 2025 : <strong>owasp.org/Top10/2025/</strong><br>
+    • OWASP ASVS (Application Security Verification Standard) : référentiel de contrôles de sécurité vérifiables<br>
+    • OWASP Dependency-Track : surveillance des dépendances vulnérables<br>
+    • OWASP Cheat Sheet Series : guides pratiques par catégorie de risque
+  </div>
+
+  <div class="conclu-box" style="margin-top:12px;">
+    <h3>Message final</h3>
+    <p>La sécurité applicative n'est pas un état mais un processus continu. Les menaces évoluent, les architectures se complexifient et les surfaces d'attaque s'élargissent. L'OWASP Top 10, mis à jour régulièrement, constitue un point de référence essentiel pour prioriser les efforts de sécurité et construire des applications résilientes.</p>
+    <p style="margin-top:8px; font-size:8pt; opacity:0.75;">Rapport réalisé par <strong style="color:#93c5fd;">Talel Chaanbi</strong> — Module Sécurité des Applications Web — 06 Mars 2026</p>
+  </div>
+
+</div>
+
+</body>
+</html>
