@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Rapport Sécurité – Secure Coding Best Practices</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+  :root {
+    --primary:   #1e3a5f;
+    --accent:    #2563eb;
+    --green:     #16a34a;
+    --red:       #b91c1c;
+    --orange:    #d97706;
+    --light-bg:  #f1f5f9;
+    --border:    #cbd5e1;
+    --text:      #1e293b;
+    --muted:     #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', Arial, sans-serif;
+    color: var(--text);
+    background: #fff;
+    font-size: 9.5pt;
+    line-height: 1.5;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    width: 100%;
+    min-height: 297mm;
+    background: linear-gradient(145deg, #0f2849 0%, #1e3a5f 55%, #2563eb 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 40px;
+    page-break-after: always;
+    page: cover-page;
+    position: relative;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .cover-logo {
+    width: 90px; height: 90px;
+    background: rgba(255,255,255,0.12);
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px;
+    font-size: 44px;
+  }
+  .cover-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 30px;
+    padding: 6px 20px;
+    font-size: 9pt;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .cover h1 {
+    font-size: 30pt;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .cover h2 {
+    font-size: 14pt;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 40px;
+  }
+  .cover-divider {
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    border-radius: 2px;
+    margin: 24px auto;
+  }
+  .cover-meta {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 20px 40px;
+    color: rgba(255,255,255,0.9);
+    font-size: 10pt;
+    line-height: 2;
+  }
+  .cover-meta strong { color: #fff; }
+  .cover-footer {
+    position: absolute;
+    bottom: 30px;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  /* ── CONTENT PAGES ── */
+  .page {
+    padding: 0 0 10mm 0;
+    page-break-after: always;
+    page: content-page;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── RUNNING HEADER (répété sur chaque page via @page margin box) ── */
+  /* WeasyPrint extrait cet élément du flux normal et l'affiche dans la     */
+  /* zone @top-left de chaque page nommée content-page.                     */
+  .running-header {
+    position: running(pageHeader);
+    width: 100%;
+    border-bottom: 2.5px solid var(--primary);
+    padding-bottom: 5pt;
+    font-size: 8pt;
+  }
+  .running-header table { width: 100%; border-collapse: collapse; border: none; margin: 0; padding: 0; }
+  .running-header td    { border: none !important; padding: 0 !important; background: transparent !important;
+                          font-size: 8pt; vertical-align: middle; }
+  .running-header .rh-left  { color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .running-header .rh-right { color: var(--accent); font-weight: 700; text-align: right; }
+
+  /* ── SECTION TITLES ── */
+  h2.section-title {
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  h2.section-title .num {
+    display: inline-flex;
+    width: 26px; height: 26px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10pt;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-line {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    margin-bottom: 10px;
+    border-radius: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  h3.sub-title {
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 10px 0 6px;
+    padding-left: 10px;
+    border-left: 3px solid var(--accent);
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  p { margin-bottom: 6px; }
+
+  /* ── INFO BOXES ── */
+  .info-box {
+    background: #eff6ff;
+    border-left: 4px solid var(--accent);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .warn-box {
+    background: #fefce8;
+    border-left: 4px solid var(--orange);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .danger-box {
+    background: #fef2f2;
+    border-left: 4px solid var(--red);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .success-box {
+    background: #f0fdf4;
+    border-left: 4px solid var(--green);
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* ── CODE BLOCKS ── */
+  .code-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 8px 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .code-block {
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 7.5pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .code-block .code-header {
+    padding: 5px 10px;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .code-block.before .code-header { background: #fee2e2; color: #991b1b; }
+  .code-block.after  .code-header { background: #dcfce7; color: #166534; }
+  .code-block pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 8px 10px;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.4;
+    font-family: 'Courier New', monospace;
+    font-size: 7.2pt;
+  }
+  .code-block.before pre { border-top: 1px solid #fca5a5; }
+  .code-block.after  pre { border-top: 1px solid #86efac; }
+
+  /* single-column code */
+  .code-single { margin: 8px 0; border-radius: 6px; overflow: hidden; break-inside: avoid; page-break-inside: avoid; }
+  .code-single .code-header { background: #1e293b; color: #94a3b8; padding: 5px 12px; font-size: 7.5pt; font-weight: 600; }
+  .code-single pre { background: #0f172a; color: #e2e8f0; padding: 8px 12px; margin: 0; font-family: 'Courier New', monospace; font-size: 7.2pt; white-space: pre-wrap; line-height: 1.4; }
+
+  /* ── TABLE ── */
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 8.5pt; }
+  thead { display: table-header-group; }
+  th { background: var(--primary); color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  tr:nth-child(even) td { background: var(--light-bg); }
+
+  /* ── BADGES ── */
+  .badge { display: inline-block; border-radius: 20px; padding: 2px 10px; font-size: 8pt; font-weight: 600; margin: 2px; }
+  .badge-red    { background: #fee2e2; color: #991b1b; }
+  .badge-green  { background: #dcfce7; color: #166534; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-orange { background: #fef3c7; color: #92400e; }
+
+  /* ── VULNERABILITY CARDS ── */
+  .vuln-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; break-inside: avoid; page-break-inside: avoid; }
+  .vuln-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .vuln-card .vc-header {
+    padding: 7px 10px;
+    font-weight: 700;
+    font-size: 8.5pt;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .vuln-card.critical .vc-header { background: #fef2f2; color: #991b1b; border-bottom: 1px solid #fca5a5; }
+  .vuln-card.medium   .vc-header { background: #fefce8; color: #92400e; border-bottom: 1px solid #fde68a; }
+  .vuln-card .vc-body { padding: 7px 10px; font-size: 8pt; line-height: 1.45; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 6px 0; }
+  .checklist li { padding: 4px 0 4px 24px; position: relative; font-size: 9pt; border-bottom: 1px solid #f1f5f9; break-inside: avoid; page-break-inside: avoid; }
+  .checklist li::before { position: absolute; left: 0; top: 4px; font-size: 10pt; }
+  .checklist li.ok::before   { content: '✅'; }
+  .checklist li.warn::before { content: '⚠️'; }
+  .checklist li.fail::before { content: '❌'; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin: 12px 0; }
+  .sum-card {
+    border-radius: 8px;
+    padding: 12px 8px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .sum-card .num { font-size: 22pt; font-weight: 800; line-height: 1; }
+  .sum-card .lbl { font-size: 7.5pt; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .sum-card.blue   { background: #eff6ff; border-color: #bfdbfe; }
+  .sum-card.blue   .num { color: var(--accent); }
+  .sum-card.green  { background: #f0fdf4; border-color: #bbf7d0; }
+  .sum-card.green  .num { color: var(--green); }
+  .sum-card.red    { background: #fef2f2; border-color: #fecaca; }
+  .sum-card.red    .num { color: var(--red); }
+  .sum-card.orange { background: #fffbeb; border-color: #fde68a; }
+  .sum-card.orange .num { color: var(--orange); }
+
+  /* ── TOC ── */
+  .toc-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted var(--border); font-size: 9.5pt; break-inside: avoid; page-break-inside: avoid; }
+  .toc-item .toc-num { color: var(--accent); font-weight: 700; min-width: 28px; }
+
+  /* ── CONCLUSION CARD ── */
+  .conclu-box {
+    background: linear-gradient(135deg, #0f2849, #1e3a5f);
+    color: #fff;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 10px 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .conclu-box h3 { color: #93c5fd; margin-bottom: 6px; font-size: 11pt; }
+  .conclu-box p  { color: rgba(255,255,255,0.85); font-size: 9pt; margin-bottom: 4px; }
+
+  /* ── @PAGE RULES ── */
+  /* cover-page : pleine page, pas de marge, pas de header         */
+  @page cover-page {
+    size: A4;
+    margin: 0;
+  }
+  /* content-page : marge haute pour loger le running header */
+  @page content-page {
+    size: A4;
+    margin: 20mm 15mm 14mm 15mm;
+    @top-left {
+      content: element(pageHeader);
+      vertical-align: bottom;
+      padding-bottom: 4pt;
+      width: 100%;
+    }
+  }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Élément running-header : extrait du flux par WeasyPrint et affiché
+     automatiquement en haut de chaque page nommée content-page. -->
+<div class="running-header">
+  <table><tr>
+    <td class="rh-left">Secure Coding Best Practices &ndash; Talel Chaanbi</td>
+    <td class="rh-right">&#128737; OWASP SCP</td>
+  </tr></table>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE DE COUVERTURE
+══════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">🛡</div>
+  <div class="cover-badge">Sécurité Applicative – TP</div>
+  <h1>Secure Coding<br>Best Practices</h1>
+  <h2>Audit &amp; Sécurisation d'une Application PHP d'Authentification</h2>
+  <div class="cover-divider"></div>
+  <p style="color:rgba(255,255,255,0.6); font-size:9pt; margin-bottom:24px;">
+    Basé sur les recommandations <strong style="color:#93c5fd;">OWASP Secure Coding Practices (SCP)</strong>
+  </p>
+  <div class="cover-meta">
+    <strong>Étudiant :</strong> Talel Chaanbi<br>
+    <strong>Module :</strong> Sécurité des Applications Web<br>
+    <strong>Sujet :</strong> Révision et sécurisation d'un code PHP selon OWASP SCP<br>
+    <strong>Date :</strong> 06 Mars 2026
+  </div>
+  <div class="cover-footer">CONFIDENTIEL – Usage académique uniquement</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 – TABLE DES MATIÈRES
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">📋</span>Table des Matières</h2>
+  <div class="section-line"></div>
+
+  <div class="toc-item"><span><span class="toc-num">1.</span> Introduction &amp; Contexte</span><span style="color:var(--muted)">3</span></div>
+  <div class="toc-item"><span><span class="toc-num">2.</span> Audit Initial – Vulnérabilités Identifiées</span><span style="color:var(--muted)">3</span></div>
+  <div class="toc-item"><span><span class="toc-num">3.</span> Bonne Pratique 1 – Hachage Sécurisé des Mots de Passe</span><span style="color:var(--muted)">4</span></div>
+  <div class="toc-item"><span><span class="toc-num">4.</span> Bonne Pratique 2 – Protection contre la Force Brute</span><span style="color:var(--muted)">4</span></div>
+  <div class="toc-item"><span><span class="toc-num">5.</span> Bonne Pratique 3 – Jetons CSRF</span><span style="color:var(--muted)">5</span></div>
+  <div class="toc-item"><span><span class="toc-num">6.</span> Bonne Pratique 4 – Gestion Sécurisée des Sessions</span><span style="color:var(--muted)">5</span></div>
+  <div class="toc-item"><span><span class="toc-num">7.</span> Bonne Pratique 5 – Sécurité des Cookies de Session</span><span style="color:var(--muted)">6</span></div>
+  <div class="toc-item"><span><span class="toc-num">8.</span> Bonne Pratique 6 – Gestion Sécurisée des Erreurs</span><span style="color:var(--muted)">6</span></div>
+  <div class="toc-item"><span><span class="toc-num">9.</span> Bonne Pratique 7 – Gestion des Credentials</span><span style="color:var(--muted)">7</span></div>
+  <div class="toc-item"><span><span class="toc-num">10.</span> Tableau Récapitulatif des Modifications</span><span style="color:var(--muted)">7</span></div>
+  <div class="toc-item"><span><span class="toc-num">11.</span> Conclusion &amp; Recommandations</span><span style="color:var(--muted)">8</span></div>
+
+  <br>
+  <div class="summary-grid">
+    <div class="sum-card red"><div class="num">9</div><div class="lbl">Vulnérabilités détectées</div></div>
+    <div class="sum-card green"><div class="num">9</div><div class="lbl">Corrections appliquées</div></div>
+    <div class="sum-card blue"><div class="num">7</div><div class="lbl">Bonnes pratiques OWASP</div></div>
+    <div class="sum-card orange"><div class="num">4</div><div class="lbl">Fichiers modifiés</div></div>
+  </div>
+
+  <div class="info-box">
+    <strong>📖 Référence :</strong> OWASP Secure Coding Practices – Quick Reference Guide v2.0.<br>
+    Les numéros de section (§) référencés dans ce rapport correspondent aux chapitres du guide OWASP SCP.
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 3 – INTRO + AUDIT
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">1</span>Introduction &amp; Contexte</h2>
+  <div class="section-line"></div>
+
+  <p>Dans le cadre du TP de sécurité applicative, une application PHP d'authentification a été développée lors d'une activité précédente. Cette application comprend les fichiers suivants :</p>
+
+  <table>
+    <tr><th>Fichier</th><th>Rôle</th></tr>
+    <tr><td><code>index.php</code></td><td>Page de connexion (formulaire login/mot de passe)</td></tr>
+    <tr><td><code>config.php</code></td><td>Configuration de la connexion à la base de données</td></tr>
+    <tr><td><code>dashboard.php</code></td><td>Page privée accessible après authentification</td></tr>
+    <tr><td><code>logout.php</code></td><td>Script de déconnexion et destruction de session</td></tr>
+  </table>
+
+  <p>L'objectif de ce rapport est de présenter l'audit du code original, les vulnérabilités identifiées, et les modifications appliquées selon les recommandations de l'<strong>OWASP Secure Coding Practices (SCP)</strong>.</p>
+
+  <h2 class="section-title" style="margin-top:24px;"><span class="num">2</span>Audit Initial – Vulnérabilités Identifiées</h2>
+  <div class="section-line"></div>
+
+  <div class="vuln-grid">
+    <div class="vuln-card critical">
+      <div class="vc-header">🔴 Mot de passe en clair <span class="badge badge-red">CRITIQUE</span></div>
+      <div class="vc-body">Les mots de passe sont stockés et comparés en clair dans la base de données. Toute compromission de la DB expose immédiatement tous les comptes.</div>
+    </div>
+    <div class="vuln-card critical">
+      <div class="vc-header">🔴 Absence de jeton CSRF <span class="badge badge-red">CRITIQUE</span></div>
+      <div class="vc-body">Aucune protection contre les attaques Cross-Site Request Forgery. Un attaquant peut forger une requête POST de connexion au nom d'un utilisateur.</div>
+    </div>
+    <div class="vuln-card critical">
+      <div class="vc-header">🔴 Pas de protection force brute <span class="badge badge-red">CRITIQUE</span></div>
+      <div class="vc-body">Aucune limitation des tentatives de connexion. Un attaquant peut tester des milliers de mots de passe sans restriction.</div>
+    </div>
+    <div class="vuln-card critical">
+      <div class="vc-header">🔴 Fixation de session <span class="badge badge-red">CRITIQUE</span></div>
+      <div class="vc-body">L'ID de session n'est pas régénéré après la connexion. Un attaquant qui connaît l'ID de session peut l'utiliser pour prendre le contrôle du compte.</div>
+    </div>
+    <div class="vuln-card medium">
+      <div class="vc-header">🟡 Cookie session non sécurisé <span class="badge badge-orange">MOYEN</span></div>
+      <div class="vc-body">Les flags <code>HttpOnly</code>, <code>SameSite</code> et <code>Secure</code> ne sont pas configurés, exposant le cookie à des vols via XSS ou inter-sites.</div>
+    </div>
+    <div class="vuln-card medium">
+      <div class="vc-header">🟡 Pas de timeout de session <span class="badge badge-orange">MOYEN</span></div>
+      <div class="vc-body">La session ne expire jamais par inactivité. Un poste laissé sans surveillance reste connecté indéfiniment.</div>
+    </div>
+    <div class="vuln-card medium">
+      <div class="vc-header">🟡 Déconnexion incomplète <span class="badge badge-orange">MOYEN</span></div>
+      <div class="vc-body">La déconnexion détruit la session côté serveur mais ne supprime pas le cookie côté client, permettant une réutilisation potentielle.</div>
+    </div>
+    <div class="vuln-card medium">
+      <div class="vc-header">🟡 Credentials codés en dur <span class="badge badge-orange">MOYEN</span></div>
+      <div class="vc-body">Les identifiants de la base de données sont écrits en clair dans le code source. Tout accès au dépôt Git ou au fichier expose les credentials.</div>
+    </div>
+  </div>
+
+  <div class="vuln-card critical" style="margin-top:0;">
+    <div class="vc-header">🔴 Erreur DB exposée publiquement <span class="badge badge-red">CRITIQUE</span></div>
+    <div class="vc-body">En cas d'erreur de connexion à la base de données, le message d'erreur MySQL complet était affiché à l'utilisateur, révélant des informations sur l'infrastructure.</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 4 – BP1 + BP2
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">3</span>BP1 – Hachage Sécurisé des Mots de Passe</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §2 – Authentication :</strong> « Store passwords using a strong, adaptive and salted hashing algorithm. Never store or transmit passwords in clear text. »</div>
+
+  <p>La vulnérabilité principale du code original était la comparaison des mots de passe en clair directement dans la requête SQL. Cette approche expose les mots de passe en cas de compromission de la base de données et permet des attaques par timing.</p>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Mot de passe en clair dans SQL</div>
+      <pre>$sql = 'SELECT login FROM users
+  WHERE login = ?
+  AND pass = ? LIMIT 1';
+
+$stmt->bind_param('ss', $login, $password);
+// Le mot de passe transite dans la requête SQL
+// Stockage en clair dans la base de données</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Hash bcrypt + password_verify()</div>
+      <pre>// Récupère seulement par login
+$sql = 'SELECT login, pass FROM users
+  WHERE login = ? LIMIT 1';
+$stmt->bind_param('s', $login);
+
+// Comparaison sécurisée en PHP
+$valid = $user &&
+  password_verify($password, $user['pass']);</pre>
+    </div>
+  </div>
+
+  <p>Un script de migration <strong>hash_password.php</strong> a été créé pour convertir les mots de passe existants en hashes bcrypt via <code>password_hash($pass, PASSWORD_DEFAULT)</code>.</p>
+
+  <div class="success-box">
+    <strong>✅ Résultat :</strong> Les mots de passe sont stockés sous forme de hash bcrypt adaptatif (coût 12 par défaut). Même en cas de fuite de la base de données, les mots de passe originaux ne peuvent pas être retrouvés directement.
+  </div>
+
+  <h2 class="section-title" style="margin-top:26px;"><span class="num">4</span>BP2 – Protection contre la Force Brute</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §2 – Authentication :</strong> « Lock out accounts after a defined number of failed login attempts. »</div>
+
+  <p>Le code original n'imposait aucune limite sur les tentatives de connexion. Un attaquant pouvait tester des milliers de combinaisons sans aucune restriction.</p>
+
+  <div class="code-single">
+    <div class="code-header">✅ APRÈS – Verrouillage après 5 tentatives échouées (index.php)</div>
+    <pre>define('MAX_FAILED_ATTEMPTS', 5);
+define('LOCKOUT_DURATION',    300); // 5 minutes en secondes
+
+// Vérification du verrouillage
+if (
+    isset($_SESSION['failed_attempts'], $_SESSION['lockout_time']) &&
+    $_SESSION['failed_attempts'] >= MAX_FAILED_ATTEMPTS &&
+    (time() - $_SESSION['lockout_time']) < LOCKOUT_DURATION
+) {
+    $remaining = LOCKOUT_DURATION - (time() - $_SESSION['lockout_time']);
+    $message   = "Compte temporairement bloqué. Réessayez dans {$remaining} s.";
+}
+
+// Incrément du compteur en cas d'échec
+$_SESSION['failed_attempts'] = ($_SESSION['failed_attempts'] ?? 0) + 1;
+if ($_SESSION['failed_attempts'] >= MAX_FAILED_ATTEMPTS) {
+    $_SESSION['lockout_time'] = time();
+}</pre>
+  </div>
+
+  <div class="success-box">
+    <strong>✅ Résultat :</strong> Après 5 tentatives échouées, le compte est verrouillé pendant 5 minutes. Le compteur est remis à zéro après une connexion réussie.
+  </div>
+
+  <div class="warn-box">
+    <strong>⚠️ Note Production :</strong> Pour une application en production, il est recommandé de stocker le compteur en base de données (par IP et par login) plutôt qu'en session, et d'implémenter un CAPTCHA après le 3e échec.
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 5 – BP3 + BP4
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">5</span>BP3 – Protection CSRF par Jeton Synchronisé</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §5 – CSRF Protection :</strong> « Include a unique token in all forms and verify it on the server side. Use hash_equals() for timing-safe comparison. »</div>
+
+  <p>Une attaque CSRF (Cross-Site Request Forgery) permet à un attaquant de forger une requête HTTP au nom d'un utilisateur authentifié. Sans protection, une page malveillante peut soumettre le formulaire de connexion silencieusement.</p>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Aucune protection CSRF</div>
+      <pre>&lt;form method="post" action=""&gt;
+  &lt;!-- Aucun jeton CSRF --&gt;
+  &lt;input name="login" type="text"&gt;
+  &lt;input name="password" type="password"&gt;
+  &lt;button type="submit"&gt;Connexion&lt;/button&gt;
+&lt;/form&gt;</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Jeton CSRF synchronisé</div>
+      <pre>// Génération du jeton (PHP)
+$_SESSION['csrf_token'] =
+  bin2hex(random_bytes(32));
+
+// Vérification (timing-safe)
+if (!hash_equals(
+  $_SESSION['csrf_token'],
+  $_POST['csrf_token'] ?? ''
+)) { /* rejet */ }
+
+// Formulaire HTML
+&lt;input type="hidden" name="csrf_token"
+  value="&lt;?= $token ?&gt;"&gt;</pre>
+    </div>
+  </div>
+
+  <p>Le jeton est <strong>renouvelé après chaque soumission</strong> (réussie ou échouée), rendant les tokens capturés inutilisables pour de futures requêtes.</p>
+
+  <div class="success-box">
+    <strong>✅ Résultat :</strong> Chaque formulaire contient un jeton aléatoire de 256 bits lié à la session. <code>hash_equals()</code> protège contre les attaques de timing sur la comparaison de chaînes.
+  </div>
+
+  <h2 class="section-title" style="margin-top:26px;"><span class="num">6</span>BP4 – Gestion Sécurisée des Sessions</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §3 – Session Management :</strong> « Regenerate session ID after successful login. Set session inactivity timeout. »</div>
+
+  <h3 class="sub-title">6.1 – Régénération de l'ID de session (fixation de session)</h3>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – ID de session conservé</div>
+      <pre>if ($result->num_rows === 1) {
+  $_SESSION['login'] = $login;
+  header('Location: dashboard.php');
+  exit;
+  // L'ID de session reste identique
+  // → attaque de fixation possible</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Nouvel ID après connexion</div>
+      <pre>if ($valid) {
+  // Génère un nouvel ID de session
+  // et invalide l'ancien
+  session_regenerate_id(true);
+
+  $_SESSION['login']         = $login;
+  $_SESSION['last_activity'] = time();
+  header('Location: dashboard.php');
+}</pre>
+    </div>
+  </div>
+
+  <h3 class="sub-title">6.2 – Timeout d'inactivité (dashboard.php)</h3>
+
+  <div class="code-single">
+    <div class="code-header">✅ APRÈS – Expiration après 15 minutes d'inactivité (dashboard.php)</div>
+    <pre>define('SESSION_TIMEOUT', 900); // 15 minutes
+
+if (isset($_SESSION['last_activity']) &&
+    (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
+    session_unset();
+    session_destroy();
+    header('Location: index.php?timeout=1');
+    exit;
+}
+// Mise à jour du timestamp à chaque requête
+$_SESSION['last_activity'] = time();</pre>
+  </div>
+
+  <div class="success-box">
+    <strong>✅ Résultat :</strong> L'ID de session est régénéré à la connexion (prévention fixation). La session expire automatiquement après 15 minutes d'inactivité.
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 6 – BP5 + BP6 + BP7
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">7</span>BP5 – Sécurité des Cookies de Session</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §3 – Session Management :</strong> « Set HttpOnly, SameSite=Strict, and Secure flags on session cookies. »</div>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Aucun flag de sécurité</div>
+      <pre>// Dans config.php : aucune configuration
+// des flags du cookie de session.
+// Le cookie est accessible en JavaScript,
+// envoyé sur des requêtes inter-sites,
+// et accepte les IDs fixés par l'attaquant.</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Flags sécurisés (config.php)</div>
+      <pre>// HttpOnly : cookie inaccessible en JS
+ini_set('session.cookie_httponly',  1);
+// SameSite=Strict : bloque inter-sites
+ini_set('session.cookie_samesite', 'Strict');
+// use_strict_mode : rejette IDs non-serveur
+ini_set('session.use_strict_mode',  1);
+// Secure : HTTPS uniquement (production)
+ini_set('session.cookie_secure', 0); // → 1 en prod</pre>
+    </div>
+  </div>
+
+  <h3 class="sub-title">Terminaison complète de la session – logout.php</h3>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Cookie non supprimé côté client</div>
+      <pre>session_start();
+session_unset();
+session_destroy();
+// Le cookie PHPSESSID reste dans
+// le navigateur → réutilisable !</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Cookie expiré côté client</div>
+      <pre>session_unset();
+if (ini_get('session.use_cookies')) {
+    $p = session_get_cookie_params();
+    setcookie(session_name(), '',
+        time() - 42000,  // passé → supprimé
+        $p['path'], $p['domain'],
+        $p['secure'], $p['httponly']);
+}
+session_destroy();</pre>
+    </div>
+  </div>
+
+  <div class="success-box"><strong>✅ Résultat :</strong> Le cookie de session est définitivement supprimé côté client lors de la déconnexion.</div>
+
+  <h2 class="section-title" style="margin-top:22px;"><span class="num">8</span>BP6 – Gestion Sécurisée des Erreurs</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §7 – Error Handling :</strong> « Do not disclose sensitive information in error responses. Log errors server-side only. »</div>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Erreur MySQL affichée publiquement</div>
+      <pre>die('Erreur connexion MySQL : '
+    . $conn->connect_error);
+// Révèle : version MySQL, user, hôte...</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Journalisation + message générique</div>
+      <pre>error_log('Erreur MySQL : '
+    . $conn->connect_error); // côté serveur
+http_response_code(500);
+die('Service temporairement indisponible.');</pre>
+    </div>
+  </div>
+
+  <p>De même, les erreurs de préparation de requêtes SQL et l'erreur d'authentification retournent un message générique : <em>« login ou mot de passe invalide »</em> sans préciser lequel des deux est erroné.</p>
+
+  <h2 class="section-title" style="margin-top:22px;"><span class="num">9</span>BP7 – Gestion Sécurisée des Credentials</h2>
+  <div class="section-line"></div>
+
+  <div class="info-box"><strong>📌 OWASP SCP §2 :</strong> « Do not hard-code credentials. Use environment variables or external secret management. »</div>
+
+  <div class="code-compare">
+    <div class="code-block before">
+      <div class="code-header">❌ AVANT – Credentials en dur dans le code</div>
+      <pre>$DB_HOST = 'localhost';
+$DB_USER = 'root';
+$DB_PASS = '123456'; // visible dans Git !
+$DB_NAME = 'authdb';</pre>
+    </div>
+    <div class="code-block after">
+      <div class="code-header">✅ APRÈS – Variables d'environnement</div>
+      <pre>$DB_HOST = getenv('DB_HOST') ?: 'localhost';
+$DB_USER = getenv('DB_USER') ?: 'root';
+$DB_PASS = getenv('DB_PASS') ?: '123456';
+$DB_NAME = getenv('DB_NAME') ?: 'authdb';
+// Définir DB_PASS dans l'env du serveur</pre>
+    </div>
+  </div>
+
+  <div class="success-box"><strong>✅ Résultat :</strong> En production, les credentials sont injectés via des variables d'environnement et n'apparaissent plus dans le code source ni dans l'historique Git.</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 7 – TABLEAU RÉCAPITULATIF
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">10</span>Tableau Récapitulatif des Modifications</h2>
+  <div class="section-line"></div>
+
+  <table>
+    <tr>
+      <th>#</th>
+      <th>Fichier</th>
+      <th>Vulnérabilité initiale</th>
+      <th>Correction appliquée</th>
+      <th>OWASP SCP</th>
+      <th>Sévérité</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td><code>index.php</code></td>
+      <td>Mot de passe comparé en clair dans SQL</td>
+      <td><code>password_hash()</code> + <code>password_verify()</code></td>
+      <td>§2</td>
+      <td><span class="badge badge-red">Critique</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><code>index.php</code></td>
+      <td>Aucune protection force brute</td>
+      <td>Verrouillage après 5 échecs, blocage 5 min</td>
+      <td>§2</td>
+      <td><span class="badge badge-red">Critique</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><code>index.php</code></td>
+      <td>Absence de jeton CSRF</td>
+      <td>Token <code>bin2hex(random_bytes(32))</code> + <code>hash_equals()</code></td>
+      <td>§5</td>
+      <td><span class="badge badge-red">Critique</span></td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><code>index.php</code></td>
+      <td>ID de session non régénéré</td>
+      <td><code>session_regenerate_id(true)</code> post-login</td>
+      <td>§3</td>
+      <td><span class="badge badge-red">Critique</span></td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td><code>index.php</code></td>
+      <td>Message d'erreur différencié (login vs pass)</td>
+      <td>Message générique identique</td>
+      <td>§2</td>
+      <td><span class="badge badge-orange">Moyen</span></td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><code>dashboard.php</code></td>
+      <td>Pas de timeout de session</td>
+      <td>Expiration après 15 min d'inactivité</td>
+      <td>§3</td>
+      <td><span class="badge badge-orange">Moyen</span></td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><code>logout.php</code></td>
+      <td>Cookie non supprimé côté client</td>
+      <td><code>setcookie()</code> avec date passée</td>
+      <td>§3</td>
+      <td><span class="badge badge-orange">Moyen</span></td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><code>config.php</code></td>
+      <td>Flags de session absents (HttpOnly, SameSite)</td>
+      <td><code>ini_set()</code> pour HttpOnly + SameSite=Strict + Strict Mode</td>
+      <td>§3</td>
+      <td><span class="badge badge-orange">Moyen</span></td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><code>config.php</code></td>
+      <td>Erreur MySQL exposée + credentials en dur</td>
+      <td><code>error_log()</code> + <code>getenv()</code></td>
+      <td>§2 §7</td>
+      <td><span class="badge badge-orange">Moyen</span></td>
+    </tr>
+  </table>
+
+  <br>
+  <h3 class="sub-title">Checklist de conformité OWASP SCP</h3>
+
+  <ul class="checklist">
+    <li class="ok">Mots de passe hashés avec bcrypt (PASSWORD_DEFAULT) – jamais en clair</li>
+    <li class="ok">Requêtes préparées (prepared statements) – protection SQL Injection</li>
+    <li class="ok">Jeton CSRF renouvelé à chaque soumission de formulaire</li>
+    <li class="ok">Session régénérée après chaque connexion réussie</li>
+    <li class="ok">Timeout d'inactivité de 15 minutes implémenté</li>
+    <li class="ok">Verrouillage de compte après 5 tentatives échouées</li>
+    <li class="ok">Cookie HttpOnly + SameSite=Strict configuré</li>
+    <li class="ok">Messages d'erreur génériques côté client</li>
+    <li class="ok">Erreurs techniques journalisées côté serveur uniquement</li>
+    <li class="warn">Credentials via variables d'environnement (fallback en dur en développement)</li>
+    <li class="warn">HTTPS + cookie Secure : à activer en production</li>
+    <li class="warn">Compteur de force brute en session (à migrer en DB en production)</li>
+    <li class="fail">CAPTCHA : non implémenté (recommandé pour la production)</li>
+    <li class="fail">Authentification multi-facteur (MFA) : non implémentée</li>
+  </ul>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 8 – CONCLUSION
+══════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2 class="section-title"><span class="num">11</span>Conclusion &amp; Recommandations</h2>
+  <div class="section-line"></div>
+
+  <p>Ce TP a permis de mettre en pratique les principales recommandations de l'<strong>OWASP Secure Coding Practices</strong> sur une application PHP d'authentification réelle. Le code initial présentait des vulnérabilités classiques et critiques, fréquemment rencontrées dans des applications web développées sans considération de sécurité.</p>
+
+  <div class="conclu-box">
+    <h3>🔐 Synthèse des améliorations</h3>
+    <p>✅ <strong>9 vulnérabilités corrigées</strong> dans 4 fichiers PHP</p>
+    <p>✅ <strong>7 bonnes pratiques OWASP SCP</strong> appliquées (§2, §3, §5, §7)</p>
+    <p>✅ Niveau de sécurité <strong>significativement amélioré</strong> par rapport au code original</p>
+    <p>✅ Chaque modification est <strong>documentée et référencée</strong> au guide OWASP</p>
+  </div>
+
+  <h3 class="sub-title">Recommandations pour la mise en production</h3>
+
+  <table>
+    <tr><th>Priorité</th><th>Recommandation</th><th>Référence</th></tr>
+    <tr>
+      <td><span class="badge badge-red">Critique</span></td>
+      <td>Activer HTTPS et passer <code>cookie_secure = 1</code></td>
+      <td>OWASP SCP §3</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-red">Critique</span></td>
+      <td>Supprimer <code>hash_password.php</code> après la migration</td>
+      <td>OWASP SCP §2</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-red">Critique</span></td>
+      <td>Stocker les credentials DB dans des variables d'environnement serveur</td>
+      <td>OWASP SCP §2</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-orange">Élevé</span></td>
+      <td>Déplacer <code>config.php</code> en dehors de la racine web</td>
+      <td>OWASP SCP §7</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-orange">Élevé</span></td>
+      <td>Migrer le compteur de force brute vers la base de données</td>
+      <td>OWASP SCP §2</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-orange">Élevé</span></td>
+      <td>Ajouter un CAPTCHA après 3 tentatives échouées</td>
+      <td>OWASP SCP §2</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">Moyen</span></td>
+      <td>Mettre en place une authentification multi-facteur (MFA/TOTP)</td>
+      <td>OWASP SCP §2</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">Moyen</span></td>
+      <td>Configurer un en-tête <code>Content-Security-Policy</code></td>
+      <td>OWASP SCP §5</td>
+    </tr>
+    <tr>
+      <td><span class="badge badge-blue">Moyen</span></td>
+      <td>Journalisation des tentatives de connexion avec IP et horodatage</td>
+      <td>OWASP SCP §8</td>
+    </tr>
+  </table>
+
+  <div class="info-box" style="margin-top:20px;">
+    <strong>📚 Références :</strong><br>
+    • OWASP Secure Coding Practices – Quick Reference Guide v2.0 : <em>owasp.org/www-project-secure-coding-practices-quick-reference-guide</em><br>
+    • PHP Manual – <code>password_hash()</code>, <code>session_regenerate_id()</code>, <code>random_bytes()</code><br>
+    • OWASP CSRF Prevention Cheat Sheet : <em>cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet</em>
+  </div>
+
+  <br>
+  <div style="border-top: 2px solid var(--border); padding-top: 16px; text-align: center; color: var(--muted); font-size: 8.5pt;">
+    Rapport rédigé par <strong>Talel Chaanbi</strong> – Module Sécurité des Applications Web – 06 Mars 2026<br>
+    Basé sur OWASP Secure Coding Practices (SCP) Quick Reference Guide
+  </div>
+</div>
+
+</body>
+</html>

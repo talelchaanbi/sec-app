@@ -2,35 +2,101 @@
 session_start();
 require_once __DIR__ . '/config.php';
 
+// ---------------------------------------------------------------
+// OWASP SCP §2 – Authentication : protection contre la force brute
+// Blocage temporaire après MAX_FAILED_ATTEMPTS tentatives échouées.
+// ---------------------------------------------------------------
+define('MAX_FAILED_ATTEMPTS', 5);
+define('LOCKOUT_DURATION',    300); // secondes (5 minutes)
+
 $message = '';
 
+// --- Génération du jeton CSRF (OWASP SCP §5 – CSRF Protection) ---
+// Un jeton aléatoire unique par session est créé et glissé dans le
+// formulaire ; le serveur le vérifie à chaque soumission POST.
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $login = trim($_POST['login'] ?? '');
-    $password = trim($_POST['password'] ?? '');
 
-    if ($login === '' || $password === '') {
-        $message = 'Veuillez remplir le login et le mot de passe.';
+    // 1. Validation du jeton CSRF (OWASP SCP §5)
+    //    hash_equals() évite les attaques de timing sur la comparaison.
+    $csrfToken = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'], $csrfToken)) {
+        $message = 'Requête invalide (jeton CSRF incorrect).';
+
+    // 2. Vérification du verrouillage de compte (OWASP SCP §2 – Brute Force)
+    } elseif (
+        isset($_SESSION['failed_attempts'], $_SESSION['lockout_time']) &&
+        $_SESSION['failed_attempts'] >= MAX_FAILED_ATTEMPTS &&
+        (time() - $_SESSION['lockout_time']) < LOCKOUT_DURATION
+    ) {
+        $remaining = LOCKOUT_DURATION - (time() - $_SESSION['lockout_time']);
+        $message   = "Compte temporairement bloqué. Réessayez dans {$remaining} s.";
+
     } else {
-        $sql = 'SELECT login FROM users WHERE login = ? AND pass = ? LIMIT 1';
-        $stmt = $conn->prepare($sql);
+        $login    = trim($_POST['login']    ?? '');
+        $password = trim($_POST['password'] ?? '');
 
-        if ($stmt) {
-            $stmt->bind_param('ss', $login, $password);
-            $stmt->execute();
-            $result = $stmt->get_result();
-
-            if ($result && $result->num_rows === 1) {
-                $_SESSION['login'] = $login;
-                header('Location: dashboard.php');
-                exit;
-            } else {
-                $message = 'Authentification échouée : login ou mot de passe invalide.';
-            }
-            $stmt->close();
+        if ($login === '' || $password === '') {
+            $message = 'Veuillez remplir le login et le mot de passe.';
         } else {
-            $message = 'Erreur serveur lors de la préparation de la requête.';
+            // 3. On récupère UNIQUEMENT par login ; le hash est comparé en PHP
+            //    (OWASP SCP §2 – ne jamais passer le mot de passe dans la requête SQL)
+            $sql  = 'SELECT login, pass FROM users WHERE login = ? LIMIT 1';
+            $stmt = $conn->prepare($sql);
+
+            if ($stmt) {
+                $stmt->bind_param('s', $login);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user   = $result ? $result->fetch_assoc() : null;
+                $stmt->close();
+
+                // 4. Vérification du hash bcrypt (OWASP SCP §2 – Stockage sécurisé)
+                //    password_verify() compare le mot de passe clair au hash stocké.
+                //    Ne jamais stocker ni comparer les mots de passe en clair.
+                $valid = $user && password_verify($password, $user['pass']);
+
+                if ($valid) {
+                    // 5. Réinitialisation du compteur d'échecs
+                    unset($_SESSION['failed_attempts'], $_SESSION['lockout_time']);
+
+                    // 6. Prévention de la fixation de session (OWASP SCP §3)
+                    //    Génère un nouvel ID de session après une authentification
+                    //    réussie pour invalider tout ID préalablement fixé.
+                    session_regenerate_id(true);
+
+                    // 7. Renouvellement du jeton CSRF après connexion
+                    $_SESSION['csrf_token']     = bin2hex(random_bytes(32));
+
+                    $_SESSION['login']          = $login;
+                    $_SESSION['last_activity']  = time(); // utilisé pour le timeout
+
+                    header('Location: dashboard.php');
+                    exit;
+                } else {
+                    // 8. Message d'erreur générique (OWASP SCP §2)
+                    //    Ne pas indiquer si c'est le login OU le mot de passe qui est faux.
+                    $message = 'Authentification échouée : login ou mot de passe invalide.';
+
+                    // 9. Incrément du compteur d'échecs (OWASP SCP §2 – Brute Force)
+                    $_SESSION['failed_attempts'] = ($_SESSION['failed_attempts'] ?? 0) + 1;
+                    if ($_SESSION['failed_attempts'] >= MAX_FAILED_ATTEMPTS) {
+                        $_SESSION['lockout_time'] = time();
+                    }
+                }
+            } else {
+                // OWASP SCP §7 : journaliser l'erreur, ne pas l'exposer
+                error_log('Erreur préparation requête : ' . $conn->error);
+                $message = 'Erreur serveur. Veuillez réessayer plus tard.';
+            }
         }
     }
+
+    // 10. Renouvellement du jeton CSRF après chaque soumission (même échouée)
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
 <!doctype html>
@@ -85,11 +151,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="card">
     <h1>Connexion</h1>
     <form method="post" action="">
+        <!-- Jeton CSRF caché (OWASP SCP §5 – CSRF Protection) -->
+        <input type="hidden" name="csrf_token"
+               value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+
         <label for="login">Login</label>
-        <input id="login" name="login" type="text" required>
+        <!-- autocomplete="username" aide le gestionnaire de mots de passe du navigateur -->
+        <input id="login" name="login" type="text" required autocomplete="username">
 
         <label for="password">Mot de passe</label>
-        <input id="password" name="password" type="password" required>
+        <input id="password" name="password" type="password" required autocomplete="current-password">
 
         <button type="submit">Se connecter</button>
     </form>

@@ -1,10 +1,28 @@
 <?php
 session_start();
 
+// OWASP SCP §3 – Session Management : timeout d'inactivité
+// Si l'utilisateur reste inactif plus de SESSION_TIMEOUT secondes,
+// sa session est détruite et il est renvoyé à la page de connexion.
+define('SESSION_TIMEOUT', 900); // 15 minutes
+
 if (!isset($_SESSION['login'])) {
     header('Location: index.php');
     exit;
 }
+
+// Vérification du timeout d'inactivité (OWASP SCP §3)
+if (isset($_SESSION['last_activity']) &&
+    (time() - $_SESSION['last_activity']) > SESSION_TIMEOUT) {
+    // Session expirée : destruction propre côté serveur
+    session_unset();
+    session_destroy();
+    header('Location: index.php?timeout=1');
+    exit;
+}
+
+// Mise à jour du timestamp d'activité à chaque requête authentifiée
+$_SESSION['last_activity'] = time();
 ?>
 <!doctype html>
 <html lang="fr">
